@@ -40,6 +40,15 @@ function _update60()
 		mtimer=0
 		music(0,600)
 	end
+	
+	if btn(❎)
+	 or btn(🅾️)
+	 or btn(⬅️)
+	 or btn(➡️)
+	 or btn(⬆️)
+	 or btn(⬇️) then
+	 load("02_intro")
+	end
 end
 
 function updatesplashes()
