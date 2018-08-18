@@ -3,7 +3,9 @@ version 16
 __lua__
 --picoheads intro
 
-function _init() end
+function _init()
+	music(0)
+end
 
 function _update60() end
 
