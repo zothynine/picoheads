@@ -8,15 +8,12 @@ function _init()
 	kx=80
 	y=0
 	timer=0
-	mtimer=0
 	bubbles={}
 	splashes={}
-	music(0,600)
 end
 
 function _update60()
 	timer+=1
-	mtimer+=1
 	local _mtrigger = 45
 	local _ktrigger = 90
 	if (timer==120) timer=0
@@ -35,11 +32,6 @@ function _update60()
 	if (y>54 and y<64) addsplashes()
 	
 	updatesplashes()
-	
-	if mtimer==4000 then
-		mtimer=0
-		music(0,600)
-	end
 	
 	if btn(❎)
 	 or btn(🅾️)
