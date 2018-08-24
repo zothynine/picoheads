@@ -4,24 +4,51 @@ __lua__
 --picoheads intro
 
 function _init()
-	target_w=14
-	target_h=32
-	sw=140
-	sh=320
+	st_w=14 --sprite target with
+	st_h=32 --sprite target height
+	sw=140  --sprite width
+	sh=320  --sprite height
+	s_anim_done=false
+	--title
+	t="wir entwickeln"
+	tx=center_text(t)
+	ty=-5
+	tty=15 --title target y
+	t_start=false --start title animation
+	t_done=false --title anim done
 	--music(0)
 end
 
+function center_text(_t)
+	return (128-(#_t*4))/2
+end
+
 function _update60()
-	if (sw > target_w) sw-=1
-	if sh > target_h then
+	if (sw==st_w) s_anim_done=true
+	if (ty==tty) t_done=true
+	
+	if not s_anim_done then
+		sw-=1
 		sh-=2.28571
 	else
-		sh=target_h
+		sh=st_h		
+		t_start=true
+	end
+			
+	if t_start then
+		if not t_done then
+			ty+=1
+		else
+			t_done=true
+		end
 	end
 end
 
 function _draw()
 	cls()
+	if s_anim_done then
+		print("wir entwickeln",tx,ty,7)
+	end
 	--mario
 	sspr(0,0,7,16,30,75,sw,sh)
 	--klemens
