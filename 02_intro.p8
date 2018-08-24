@@ -16,6 +16,13 @@ function _init()
 	tty=15 --title target y
 	t_start=false --start title animation
 	t_done=false --title anim done
+	--tagline
+	tg="presentiert von picoheads"
+	tgx=-100
+	tgtx=center_text(tg) --tagline target x
+	tgy=26
+	tg_start=false --start tagline animation
+	tg_done=false --tagline anim done
 	--music(0)
 end
 
@@ -26,29 +33,43 @@ end
 function _update60()
 	if (sw==st_w) s_anim_done=true
 	if (ty==tty) t_done=true
+	if (tgx==tgtx) tg_done=true
 	
 	if not s_anim_done then
 		sw-=1
 		sh-=2.28571
 	else
-		sh=st_h		
+		sh=st_h
 		t_start=true
 	end
 			
 	if t_start then
 		if not t_done then
-			ty+=1
+			local tdy=((tty-ty)/4)*0.4
+			ty+=tdy
+			if (tdy==0) then
+				t_done=true
+			end
 		else
 			t_done=true
+			tg_start=true
+		end
+	end
+	
+	if tg_start then
+	 if not tg_done then
+			local tgdx=((tgtx-tgx)/4)*0.4
+			tgx+=tgdx
+		else
+			tg_done=true
 		end
 	end
 end
 
 function _draw()
 	cls()
-	if s_anim_done then
-		print("wir entwickeln",tx,ty,7)
-	end
+	print(t,tx,ty,7) --title
+	print(tg,tgx,tgy,7) --tagline
 	--mario
 	sspr(0,0,7,16,30,75,sw,sh)
 	--klemens
