@@ -4,25 +4,26 @@ __lua__
 --picoheads intro
 
 function _init()
-	st_w=14 --sprite target with
-	st_h=32 --sprite target height
-	sw=140  --sprite width
-	sh=320  --sprite height
-	s_anim_done=false
 	--title
 	t="wir entwickeln"
 	tx=center_text(t)
 	ty=-5
 	tty=15 --title target y
-	t_start=false --start title animation
 	t_done=false --title anim done
 	--tagline
 	tg="presentiert von picoheads"
 	tgx=-100
 	tgtx=center_text(tg) --tagline target x
 	tgy=26
-	tg_start=false --start tagline animation
 	tg_done=false --tagline anim done
+	--episode
+	e="episode #1"
+	ex=-60
+	etx=center_text(e) --episode target x
+	ey=38
+	e_done=false --episode anim done
+	
+	
 	--music(0)
 end
 
@@ -31,49 +32,47 @@ function center_text(_t)
 end
 
 function _update60()
-	if (sw==st_w) s_anim_done=true
-	if (ty==tty) t_done=true
-	if (tgx==tgtx) tg_done=true
-	
-	if not s_anim_done then
-		sw-=1
-		sh-=2.28571
-	else
-		sh=st_h
-		t_start=true
-	end
-			
-	if t_start then
-		if not t_done then
-			local tdy=((tty-ty)/4)*0.4
-			ty+=tdy
-			if (tdy==0) then
-				t_done=true
-			end
-		else
+	--title animation
+	if not t_done then
+		local tdy=((tty-ty)/4)*0.4
+		ty+=tdy
+		if (tdy==0) then
 			t_done=true
-			tg_start=true
 		end
 	end
 	
-	if tg_start then
+	--tagline animation
+	if t_done then
 	 if not tg_done then
 			local tgdx=((tgtx-tgx)/4)*0.4
 			tgx+=tgdx
-		else
-			tg_done=true
+ 		if (tgdx==0) then
+				tg_done=true
+ 		end
 		end
 	end
+	
+	--episode animation
+	if tg_done then
+	 if not e_done then
+			local edx=((etx-ex)/4)*0.4
+			ex+=edx
+		else
+			e_done=true
+		end
+	end
+		
 end
 
 function _draw()
 	cls()
 	print(t,tx,ty,7) --title
 	print(tg,tgx,tgy,7) --tagline
+	print(e,ex,ey,7) --tagline
 	--mario
-	sspr(0,0,7,16,30,75,sw,sh)
+	--sspr(0,0,7,16,30,75,sw,sh)
 	--klemens
-	sspr(8,0,7,16,70,75,sw,sh)
+	--sspr(8,0,7,16,70,75,sw,sh)
 end
 __gfx__
 00444400004440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
