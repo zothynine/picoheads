@@ -11,7 +11,7 @@ function _init()
 		ln3="",
 		txt1="wir entwickeln",
 		txt2="presentiert von picoheads",
-		txt3="episode #1 - der beginn!",
+		txt3="episode #1 - der beginn",
 		x=10,
 		ln1_y=15,
 		ln2_y=26,
@@ -31,11 +31,11 @@ function _init()
 	mspr=1
 	ml="mario"
 	mx=-7-(#ml*4)
-	mtx=40
+	mtx=38
 	kl="klemens"
 	kspr=2
 	kx=128+(#kl*4)
-	ktx=80
+	ktx=78
 	avy=50
 	av_done=false
 	⧗={
