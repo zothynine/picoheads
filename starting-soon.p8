@@ -39,7 +39,7 @@ function _update60()
 	 or btn(➡️)
 	 or btn(⬆️)
 	 or btn(⬇️) then
-	 load("02_intro")
+	 load("intro")
 	end
 end
 
