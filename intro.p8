@@ -9,13 +9,16 @@ function _init()
 		ln1="",
 		ln2="",
 		ln3="",
+		ln4="",
 		txt1="wir entwickeln",
 		txt2="presented by picoheads",
-		txt3="episode #1 - der beginn",
+		txt3="episode #1:",
+		txt4="aller anfang ist...",
 		x=10,
 		ln1_y=15,
 		ln2_y=26,
 		ln3_y=98,
+		ln4_y=112,
 		speed=5,
 		⧗=5
 	}
@@ -100,16 +103,24 @@ function _update60()
 		end
 	end
 	
-	if av_done and #text.ln3<#text.txt3 then
-		if text.⧗==1 then
-			text.ln3=sub(text.txt3,0,#text.ln3+1)
+	if av_done then
+		if #text.ln3<#text.txt3 then
+			if text.⧗==1 then
+				text.ln3=sub(text.txt3,0,#text.ln3+1)
+			end
+			cur.x = text.x+#text.ln3*4
+			cur.y = text.ln3_y-1
+		elseif #text.ln4<#text.txt4 then
+			if text.⧗==1 then
+				text.ln4=sub(text.txt4,0,#text.ln4+1)
+			end
+			cur.x = text.x+#text.ln4*4
+			cur.y = text.ln4_y-1
 		end
-		cur.x = text.x+#text.ln3*4
-		cur.y = text.ln3_y-1
 	end
 		
 	--ending
-	if #text.ln3==#text.txt3 then
+	if #text.ln4==#text.txt4 then
 		if ⧗.ending>0 then
 			⧗.ending-=1
 		end
@@ -123,6 +134,7 @@ function _draw()
 	print(text.ln1,text.x,text.ln1_y,6) --title
 	print(text.ln2,text.x,text.ln2_y,6) --tagline
 	print(text.ln3,text.x,text.ln3_y,6) --tagline
+	print(text.ln4,text.x,text.ln4_y,6) --tagline
 	--mario
 	sspr(8,0,7,16,mx,avy)
 	print(ml,mx-(#ml*2)+3,avy+18,6)
