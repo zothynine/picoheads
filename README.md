@@ -6,7 +6,7 @@
     - Game Genre: Sidescroller Shot 'em up
     - Game Name: Catfight
     
-    ### Technical Details
+### Technical Details
 
     - Cart Filename catfight.p8
     - Git Repo: https://bitbucket.org/zothynine/picoheads.git
@@ -22,6 +22,6 @@
 ## Episode #2
 
     - Game Modes (Startscreen)
-    - Code aufrÃ¤umen
-    - Eigene Funktion fÃ¼r collision detection
+    - Code aufräumen
+    - Eigene Funktion für collision detection
     - Gegner generieren und bewegen
