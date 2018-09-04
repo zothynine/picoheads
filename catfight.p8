@@ -30,7 +30,7 @@ function _update60()
 		ascii.y=mid(0,ascii.y-1,127)
 	elseif btn(3) then
 		--unten ⬇️
-		ascii.y=mid(0,ascii.y+1,123)
+		ascii.y=mid(0,ascii.y+1,121)
 	end
 	
 	if btnp(5) then
