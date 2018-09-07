@@ -1,11 +1,11 @@
 #   Pico Heads Shownotes
 
 ##  Episode #1
-    
+
     - Episodentitel: Der Beginn
     - Game Genre: Sidescroller Shot 'em up
     - Game Name: Catfight
-    
+
 ### Technical Details
 
     - Cart Filename catfight.p8
@@ -14,14 +14,9 @@
     - Git-Tag: s01e01
     - Player Name ist ASCII
 
-
-
-    
-    
-    
 ## Episode #2
 
+    - Code aufrÃ¤umen
     - Game Modes (Startscreen)
-    - Code aufräumen
-    - Eigene Funktion für collision detection
+    - Eigene Funktion fÃ¼r collision detection
     - Gegner generieren und bewegen
