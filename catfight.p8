@@ -4,6 +4,10 @@ __lua__
 --catfight
 
 function _init()
+	⧗={
+		spawn_e=120 --temp
+	}
+	
 	ascii={
 		x=10,
 		y=10,
@@ -11,14 +15,53 @@ function _init()
 	}
 	
 	--temp
-	enemy={
-		x=100,
-		y=50,
-		h=5
-	}
+	enemies={}
+	
+	_update60=update_start
+	_draw=draw_start
 end
 
 function _update60()
+end
+
+function _draw()
+end
+
+-->8
+--start
+
+function update_start()
+	if btn(5) then
+		_update60=update_game
+		_draw=draw_game
+	end
+end
+
+function draw_start()
+	cls()
+	print("press ❎ to start",30,60,7)
+end
+-->8
+--game
+
+function collision(_a,_b)
+	--test if shot hits emeny
+	local _x=_a.x
+	local _y=_a.y
+	local _w=_a.w
+	
+	if _x+_w>=_b.x
+		and _x<_b.x+_b.w
+		and _y>=_b.y
+		and _y<=_b.y+_b.h then
+		_b.x=-8
+		return true
+	else
+		return false
+	end 
+end
+
+function move_ascii()
 	if btn(0) then
 		--links ⬅️
 		ascii.x=mid(0,ascii.x-1,127)
@@ -32,46 +75,84 @@ function _update60()
 		--unten ⬇️
 		ascii.y=mid(0,ascii.y+1,121)
 	end
-	
-	if btnp(5) then
-		add(ascii.shots,{
-			x=ascii.x+6,
-			y=ascii.y+2,
-			l=3
-		})
-	end
-	
-	--shots
+end
+
+function shoot()
+	add(ascii.shots,{
+		x=ascii.x+6,
+		y=ascii.y+2,
+		w=3
+	})
+end
+
+function check_shots()
 	for i=#ascii.shots,1,-1 do
 		local _shot=ascii.shots[i]
 		local _x=_shot.x
-		local _y=_shot.y
-		local _l=_shot.l		
+		
 		ascii.shots[i].x+=1
+		
 		-- delete shot when out of bounds
 		if (_x>127) del(ascii.shots,_shot)
 	
-		--test if shot hits emeny
-		if _x+_l>=enemy.x
-			and _y>=enemy.y
-			and _y<=enemy.y+enemy.h then
-			enemy.x=-8
-		end  
+		for i=#enemies,1,-1 do
+			local _e=enemies[i]
+			if collision(_shot,_e) then
+				del(enemies,_e)
+			end
+		end
 	end
 end
 
-function _draw()
-	cls()
-	spr(1,ascii.x,ascii.y)
-	spr(2,enemy.x,enemy.y)
+function create_enemy(_x,_y)
+ add(enemies,
+  {
+  	x=_x,
+  	y=_y,
+  	w=6,
+  	h=5
+  })
+end
+
+function update_game()
+	⧗.spawn_e-=1
+	
+	if ⧗.spawn_e==0 then
+		⧗.spawn_e=flr(30+rnd(120))
+		create_enemy(100,flr(10+rnd(90)))
+	end
+	
+	move_ascii()
+		
+	if btnp(5) then
+		shoot()
+	end
+	
+	check_shots()
+end
+
+
+function draw_shots()
 	for i=1,#ascii.shots do
 		local _x=ascii.shots[i].x
 		local _y=ascii.shots[i].y
-		local _l=ascii.shots[i].l
-		line(_x,_y,_x+_l,_y,8)
+		local _w=ascii.shots[i].w
+		line(_x,_y,_x+_w,_y,8)
 	end
 end
 
+function draw_enemy(_e)
+	spr(2,_e.x,_e.y)
+end
+
+function draw_game()
+	cls()
+	spr(1,ascii.x,ascii.y)
+	foreach(enemies,draw_enemy)
+	draw_shots()
+	
+	print(#enemies,5,5,8)
+end
 __gfx__
 00000000000007079000090000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000007779999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
