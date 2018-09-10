@@ -16,7 +16,16 @@
 
 ## Episode #2
 
-    - Code aufrÃ¤umen
+    - Code aufräumen
     - Game Modes (Startscreen)
-    - Eigene Funktion fÃ¼r collision detection
+    - Eigene Funktion für collision detection
     - Gegner generieren und bewegen
+
+## Episode #3
+
+    - Gegner Animation
+    - Gegner Formationen
+    - Collision ASCII und Gegner
+
+## Episode #4
+    - Gegner schiessen
