@@ -5,7 +5,11 @@ __lua__
 
 function _init()
 	⧗={
-		spawn_e=120 --temp
+		game={
+		 m=0,
+		 s=0,
+		 f=0
+		}
 	}
 	
 	ascii={
@@ -43,6 +47,17 @@ function draw_start()
 end
 -->8
 --game
+function update_game_timer()
+ ⧗.game.f+=1
+ if ⧗.game.f==59 then
+  ⧗.game.f=0
+  ⧗.game.s+=1
+ end
+ if ⧗.game.s==59 then
+  ⧗.game.s=0
+  ⧗.game.m+=1
+ end
+end
 
 function collision(_a,_b)
 	--test if shot hits emeny
@@ -99,28 +114,71 @@ function check_shots()
 			local _e=enemies[i]
 			if collision(_shot,_e) then
 				del(enemies,_e)
+				del(ascii.shots,_shot)
 			end
 		end
 	end
 end
 
-function create_enemy(_x,_y)
+function create_formation(_name,_amount)
+ for i=1,_amount do
+  if _name=="linear" then
+   create_enemy(127+i*10,20,_name)
+  elseif _name=="wave" then
+   create_enemy(127+i*10,40,_name)
+  elseif _name=="circle" then
+   create_enemy(127+i*10,40,_name,87,127,127,0.25-0.03*i)
+  end
+ end
+end
+
+function create_enemy(_x,_y,_f,_r,_originx,_originy,_a)
  add(enemies,
   {
   	x=_x,
   	y=_y,
   	w=6,
-  	h=5
+  	h=5,
+  	f=_f,
+  	r=_r, --circle radius
+  	ox=_originx, --circle center x
+  	oy=_originy, --circle center y
+  	a=_a --initial angle
   })
 end
 
+function update_enemies()
+ for i=#enemies,1,-1 do
+  local _e=enemies[i]
+  if _e.f=="linear" then
+   if _e.x+_e.w<0 then
+    del(enemies,_e)
+   end
+   _e.x-=0.5
+  elseif _e.f=="wave" then
+   if (_e.x+_e.w<0) del(enemies,_e)
+   _e.x-=0.2
+   _e.y-=sin(_e.x/12)
+  elseif _e.f=="circle" then
+   if (_e.y>127) del(enemies,_e)
+   _e.a+=0.003
+   if (_e.a > 1) _e.a=0
+   _e.x=_e.ox+_e.r*cos(_e.a)
+   _e.y=_e.oy+_e.r*sin(_e.a)
+  end
+ end
+end
+
 function update_game()
-	⧗.spawn_e-=1
-	
-	if ⧗.spawn_e==0 then
-		⧗.spawn_e=flr(30+rnd(120))
-		create_enemy(100,flr(10+rnd(90)))
-	end
+ update_game_timer()
+ 
+ if ⧗.game.s==3
+  and ⧗.game.f==0
+  and ⧗.game.m==0 then
+  create_formation("circle",6)
+ end
+ 
+ update_enemies()
 	
 	move_ascii()
 		
@@ -151,7 +209,8 @@ function draw_game()
 	foreach(enemies,draw_enemy)
 	draw_shots()
 	
-	print(#enemies,5,5,8)
+	print(⧗.game.m..":"..⧗.game.s..":"..⧗.game.f,5,5,8)
+ print(#enemies,5,12,8)
 end
 __gfx__
 00000000000007079000090000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
