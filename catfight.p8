@@ -246,7 +246,7 @@ function draw_game()
 	palt(ascii.cape[2],true)
 	palt(ascii.cape[3],true)
 	spr(1,ascii.x,ascii.y)
-	pal()
+	pal() --palt resetten
 	foreach(enemies,draw_enemy)
 	draw_shots()
 	
