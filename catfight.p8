@@ -12,7 +12,8 @@ function _init()
 		game={
 		 m=0,
 		 s=0,
-		 f=0
+		 f=0,
+		 str="000"
 		},
 		cape=12
 	}
@@ -25,11 +26,22 @@ function _init()
 	ascii={
 		x=10,
 		y=10,
+		w=8,
+		h=7,
 		shots={},
 		cape={9,10,13}
 	}
 	
-	--temp
+	form_i=1
+	formations={
+		{⧗="030",	name="circle",	count=6,y=40},
+		{⧗="060",name="linear",count=4,y=20},
+		{⧗="090",name="wave",count=4,y=40},
+		{⧗="0120",name="linear",count=8,y=90},
+		{⧗="0150",name="linear",count=12,y=60},
+		{⧗="0180",name="wave",count=2,y=75},
+	}
+	
 	enemies={}
 	
 	_update60=update_start
@@ -68,6 +80,7 @@ function update_game_timer()
   ⧗.game.s=0
   ⧗.game.m+=1
  end
+ ⧗.game.str=⧗.game.m..⧗.game.s..⧗.game.f
 end
 
 function collision(_a,_b)
@@ -107,7 +120,8 @@ function shoot()
 	add(ascii.shots,{
 		x=ascii.x+6,
 		y=ascii.y+2,
-		w=3
+		w=3,
+		spd=2
 	})
 	sfx(0)
 end
@@ -117,7 +131,7 @@ function check_shots()
 		local _shot=ascii.shots[i]
 		local _x=_shot.x
 		
-		ascii.shots[i].x+=1
+		_shot.x+=_shot.spd
 		
 		-- delete shot when out of bounds
 		if (_x>127) del(ascii.shots,_shot)
@@ -133,14 +147,14 @@ function check_shots()
 	end
 end
 
-function create_formation(_name,_amount)
- for i=1,_amount do
-  if _name=="linear" then
-   create_enemy(127+i*10,20,_name)
-  elseif _name=="wave" then
-   create_enemy(127+i*10,40,_name)
-  elseif _name=="circle" then
-   create_enemy(127+i*10,40,_name,87,127,127,0.25-0.03*i)
+function create_formation(_f)
+ for i=1,_f.count do
+  if _f.name=="linear" then
+   create_enemy(127+i*10,_f.y,_f.name)
+  elseif _f.name=="wave" then
+   create_enemy(127+i*10,_f.y,_f.name)
+  elseif _f.name=="circle" then
+   create_enemy(127+i*10,_f.y,_f.name,87,127,127,0.25-0.03*i)
   end
  end
 end
@@ -158,6 +172,15 @@ function create_enemy(_x,_y,_f,_r,_originx,_originy,_a)
   	oy=_originy, --circle center y
   	a=_a --initial angle
   })
+end
+
+function watch_formations()
+	local _f=formations[1]
+	if (#formations==0) return
+	if _f.⧗==⧗.game.str then
+		create_formation(_f)
+		del(formations,_f)
+	end
 end
 
 function update_enemies()
@@ -178,6 +201,11 @@ function update_enemies()
    if (_e.a > 1) _e.a=0
    _e.x=_e.ox+_e.r*cos(_e.a)
    _e.y=_e.oy+_e.r*sin(_e.a)
+  end
+  
+  if collision(_e,ascii) then
+  	_update60=update_gover
+  	_draw=draw_gover
   end
  end
 end
@@ -205,12 +233,13 @@ function update_game()
  update_game_timer()
  update_map()
  update_cape()
+ watch_formations()
  
- if ⧗.game.s==3
-  and ⧗.game.f==0
-  and ⧗.game.m==0 then
-  create_formation("circle",6)
- end
+ --if ⧗.game.s==3
+ -- and ⧗.game.f==0
+ -- and ⧗.game.m==0 then
+ -- create_formation("circle",6)
+ --end
  
  update_enemies()
 	
@@ -246,16 +275,35 @@ function draw_game()
 	palt(ascii.cape[2],true)
 	palt(ascii.cape[3],true)
 	spr(1,ascii.x,ascii.y)
-	pal() --palt resetten
+	pal()
+	palt()
 	foreach(enemies,draw_enemy)
 	draw_shots()
 	
 	print(⧗.game.m..":"..⧗.game.s..":"..⧗.game.f,5,5,8)
- print(#enemies,5,12,8)
+ 
+ if #formations>0 then
+ 	print(#formations,5,12,8)
+ end
+end
+-->8
+--game over
+
+function update_gover()
+	if btn(5) then
+		_init()
+		_update60=update_game
+		_draw=draw_game
+	end
+end
+
+function draw_gover()
+	cls()
+	print("press ❎ to try again",30,60,7)
 end
 __gfx__
 00000000000007079000090000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000d00007779999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000dd0007779999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00700700a8888b7b9855890000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00077000988777770555500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00077000077777700055000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
