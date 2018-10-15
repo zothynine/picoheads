@@ -92,7 +92,6 @@ function _draw()
 	print("episode #7 startet in kuerze",10,35,6)
 	spr(0,mx,y,1,2)
 	spr(32,kx,y,1,2)
-	spr(49,90,120)
 	
 	for row=0,16 do
 		for colm=0,8 do
