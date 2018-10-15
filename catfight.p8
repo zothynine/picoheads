@@ -13,11 +13,13 @@ function _init()
 		 m=0,
 		 s=0,
 		 f=0,
-		 str="000"
+		 str="0:0:0"
 		},
 		cape=12,
 		next_cloud=0
 	}
+	
+	ui_h=8
 	
 	score=0
 	
@@ -37,14 +39,31 @@ function _init()
 		cape={9,10,13}
 	}
 	
-	form_i=1
-	formations={
-		{⧗="030",	name="circle",	count=6,y=40},
-		{⧗="060",name="linear",count=4,y=20},
-		{⧗="090",name="wave",count=4,y=40},
-		{⧗="0120",name="linear",count=8,y=90},
-		{⧗="0150",name="linear",count=12,y=60},
-		{⧗="0180",name="wave",count=2,y=75},
+	enemy_waves={
+		{⧗="0:3:0",
+			swarm={0,10,20,30,40,50},
+			path="circle",
+			y=40},
+		{⧗="0:6:0",
+			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
+			path="linear",
+			y=20},
+		{⧗="0:9:0",
+			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
+			path="wave",
+			y=40},
+		{⧗="0:12:0",
+			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
+			path="linear",
+			y=90},
+		{⧗="0:15:0",
+			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
+			path="linear",
+			y=60},
+		{⧗="0:18:0",
+			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
+			path="wave",
+			y=75},
 	}
 	
 	enemies={}
@@ -89,7 +108,7 @@ function update_game_timer()
   ⧗.game.s=0
   ⧗.game.m+=1
  end
- ⧗.game.str=⧗.game.m..⧗.game.s..⧗.game.f
+ ⧗.game.str=⧗.game.m..":"..⧗.game.s..":"..⧗.game.f
 end
 
 function collision(_a,_b)
@@ -154,14 +173,17 @@ function check_shots()
 	end
 end
 
-function create_formation(_f)
- for i=1,_f.count do
-  if _f.name=="linear" then
-   create_enemy(127+i*10,_f.y,_f.name)
-  elseif _f.name=="wave" then
-   create_enemy(127+i*10,_f.y,_f.name)
-  elseif _f.name=="circle" then
-   create_enemy(127+i*10,_f.y,_f.name,87,127,127,0.25-0.03*i)
+function create_wave(_w)
+ for i=1,#_w.swarm do
+ 	local _xoff=127
+		local _epos=_w.swarm[i]
+	
+  if _w.path=="linear" then
+   create_enemy(_xoff+_epos,_w.y,_w.path)
+  elseif _w.path=="wave" then
+   create_enemy(_xoff+_epos,_w.y,_w.path)
+  elseif _w.path=="circle" then
+   create_enemy(_xoff+_epos,_w.y,_w.path,87,127,127,0.25-0.03*i)
   end
  end
 end
@@ -181,12 +203,12 @@ function create_enemy(_x,_y,_f,_r,_originx,_originy,_a)
   })
 end
 
-function watch_formations()
-	local _f=formations[1]
-	if (#formations==0) return
+function update_waves()
+	local _f=enemy_waves[1]
+	if (#enemy_waves==0) return
 	if _f.⧗==⧗.game.str then
-		create_formation(_f)
-		del(formations,_f)
+		create_wave(_f)
+		del(enemy_waves,_f)
 	end
 end
 
@@ -219,7 +241,7 @@ end
 
 function create_cloud()
 	local _scale=0.8+rnd(1.5)
-	local _y=0-((5*_scale)/2)
+	local _y=ui_h-((5*_scale)/2)
 	
 	add(clouds,{
 		x=135,
@@ -269,13 +291,7 @@ function update_game()
  update_clouds()
  update_map()
  update_cape()
- watch_formations()
- 
- --if ⧗.game.s==3
- -- and ⧗.game.f==0
- -- and ⧗.game.m==0 then
- -- create_formation("circle",6)
- --end
+ update_waves()
  
  update_enemies()
 	
@@ -306,6 +322,13 @@ function draw_enemy(_e)
 	spr(2,_e.x,_e.y)
 end
 
+function draw_infobar()
+	rectfill(0,0,128,ui_h,2)
+	print("🐱:"..3,2,2,7)	
+	print("score:"..score,99,2,7)	
+
+end
+
 function draw_game()
 	cls()
 	rectfill(0,0,127,127,1)
@@ -320,8 +343,7 @@ function draw_game()
 	palt()
 	foreach(enemies,draw_enemy)
 	draw_shots()
-	
-	print(score,5,5,8)
+	draw_infobar()
 	
 	--print(⧗.game.m..":"..⧗.game.s..":"..⧗.game.f,5,5,8)
  
