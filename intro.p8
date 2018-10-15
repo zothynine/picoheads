@@ -13,7 +13,7 @@ function _init()
 		txt1="wir entwickeln",
 		txt2="presented by picoheads",
 		txt3="episode #7:",
-		txt4="more of the same",
+		txt4="return of the klemens",
 		x=10,
 		ln1_y=15,
 		ln2_y=26,
