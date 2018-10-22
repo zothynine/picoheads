@@ -36,34 +36,38 @@ function _init()
 		w=8,
 		h=7,
 		shots={},
-		cape={9,10,13}
+		collided=false,
+		lives=2,
+		cape={9,10,13},
+		cooldwn=600,
+		cd⧗=600
+	}
+	
+	enemies={
+		rat={16,0,6,5},
+		mouse={22,0,6,5}
+	}
+	
+	swarms={
+		line4={{0,0},{10,0},{20,0},{30,0}},
+		line6={{0,0},{10,0},{20,0},{30,0},{40,0},{50,0}},
+		tri_s={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10}},
+		tri_l={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10},{30,-15},{30,-5},{30,5},{30,15}}
 	}
 	
 	enemy_waves={
 		{⧗="0:3:0",
-			swarm={0,10,20,30,40,50},
-			path="circle",
-			y=40},
+			swarm=swarms.tri_l,
+			enemy=enemies.rat,
+			path="wave",
+			x=128,
+			y=50},
 		{⧗="0:6:0",
-			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
+			swarm=swarms.tri_s,
+			enemy=enemies.mouse,
 			path="linear",
-			y=20},
-		{⧗="0:9:0",
-			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
-			path="wave",
-			y=40},
-		{⧗="0:12:0",
-			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
-			path="linear",
-			y=90},
-		{⧗="0:15:0",
-			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
-			path="linear",
-			y=60},
-		{⧗="0:18:0",
-			swarm={x=0,x=10,x=20,x=30,x=40,x=50},
-			path="wave",
-			y=75},
+			x=128,
+			y=40}
 	}
 	
 	enemies={}
@@ -72,8 +76,16 @@ function _init()
 	_draw=draw_start
 end
 
-function center_text(_txt)
-	return (128-(#_txt*4))/2
+function print_center(_txt,_y,_c)
+	local _t=tostr(_txt)
+	print(_t,(128-(#_t*4))/2,_y,_c)
+end
+
+function print_right(_txt,_y,_c,_o)
+	local _t=tostr(_txt)
+	local _off=_o
+	if (_o==nil) _off=0
+	print(_t,128-(#_t*4)-_off,_y,_c)
 end
 
 function _update60()
@@ -175,20 +187,20 @@ end
 
 function create_wave(_w)
  for i=1,#_w.swarm do
- 	local _xoff=127
-		local _epos=_w.swarm[i]
+ 	local _x=_w.x+_w.swarm[i][1]
+ 	local _y=_w.y+_w.swarm[i][2]
 	
   if _w.path=="linear" then
-   create_enemy(_xoff+_epos,_w.y,_w.path)
+   create_enemy(_w.enemy,_x,_y,_w.path)
   elseif _w.path=="wave" then
-   create_enemy(_xoff+_epos,_w.y,_w.path)
+   create_enemy(_w.enemy,_x,_y,_w.path)
   elseif _w.path=="circle" then
-   create_enemy(_xoff+_epos,_w.y,_w.path,87,127,127,0.25-0.03*i)
+   create_enemy(_w.enemy,_x,_y,_w.path,87,127,127,0.25-0.03*i)
   end
  end
 end
 
-function create_enemy(_x,_y,_f,_r,_originx,_originy,_a)
+function create_enemy(_sprt,_x,_y,_f,_r,_originx,_originy,_a)
  add(enemies,
   {
   	x=_x,
@@ -199,7 +211,8 @@ function create_enemy(_x,_y,_f,_r,_originx,_originy,_a)
   	r=_r, --circle radius
   	ox=_originx, --circle center x
   	oy=_originy, --circle center y
-  	a=_a --initial angle
+  	a=_a,
+  	sprt=_sprt --initial angle
   })
 end
 
@@ -222,7 +235,7 @@ function update_enemies()
    _e.x-=0.5
   elseif _e.f=="wave" then
    if (_e.x+_e.w<0) del(enemies,_e)
-   _e.x-=0.2
+   _e.x-=0.6
    _e.y-=sin(_e.x/12)
   elseif _e.f=="circle" then
    if (_e.y>127) del(enemies,_e)
@@ -233,8 +246,24 @@ function update_enemies()
   end
   
   if collision(_e,ascii) then
-  	_update60=update_gover
-  	_draw=draw_gover
+  	if not ascii.collided then
+  		ascii.lives-=1
+  		ascii.collided=true
+  	end
+  	
+  	if ascii.lives<0 then
+  		_update60=update_gover
+  		_draw=draw_gover
+  	end
+  end
+  
+  if ascii.collided then
+  	ascii.cd⧗-=1
+  	
+  	if ascii.cd⧗==0 then
+  		ascii.collided=false
+  		ascii.cd⧗=ascii.cooldwn
+  	end
   end
  end
 end
@@ -319,14 +348,23 @@ function draw_cloud(cloud)
 end
 
 function draw_enemy(_e)
-	spr(2,_e.x,_e.y)
+	local _s=_e.sprt
+	sspr(_s[1],_s[2],_s[3],_s[4],_e.x,_e.y)
 end
 
 function draw_infobar()
 	rectfill(0,0,128,ui_h,2)
-	print("🐱:"..3,2,2,7)	
-	print("score:"..score,99,2,7)	
+	print("🐱:"..ascii.lives,2,2,7)
+	print_right(score,2,7,1)
+end
 
+function draw_ascii()
+	pal(ascii.cape[1],8)
+	palt(ascii.cape[2],true)
+	palt(ascii.cape[3],true)
+	spr(1,ascii.x,ascii.y)
+	pal()
+	palt()
 end
 
 function draw_game()
@@ -335,17 +373,21 @@ function draw_game()
 	map(0,0,maps.tile1_x,0,16,16)
 	map(0,0,maps.tile2_x,0,16,16)
 	foreach(clouds,draw_cloud)
-	pal(ascii.cape[1],8)
-	palt(ascii.cape[2],true)
-	palt(ascii.cape[3],true)
-	spr(1,ascii.x,ascii.y)
-	pal()
-	palt()
+	
+	
+	if ascii.collided then
+		if ascii.cd⧗%5==0 then
+			draw_ascii()
+		end		
+	else
+		draw_ascii()
+	end
+	
 	foreach(enemies,draw_enemy)
 	draw_shots()
 	draw_infobar()
 	
-	--print(⧗.game.m..":"..⧗.game.s..":"..⧗.game.f,5,5,8)
+	--print(ascii.cd⧗,5,20,8)
  
  --if #clouds>0 then
  --print(#clouds,5,12,8)
@@ -365,17 +407,15 @@ end
 function draw_gover()
 	cls()
 	local _score_txt="your score is "..score
-	local _score_x=center_text(_score_txt)
-	local _gover_txt="press ❎ to try again"
-	print(_score_txt,_score_x,48,7)
-	print(_gover_txt,center_text(_gover_txt),60,7)
+	print_center("press ❎ to try again",60,7)
+	print_center("your score is "..score,48,7)
 end
 __gfx__
-00000000000007079000090000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000dd0007779999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700a8888b7b9855890000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000988777770555500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000077777700055000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000707900009f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000dd000777999999ffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700a8888b7b985589f4ff4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000988777770555500ffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000770000777777000550000ff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00700700070000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000700007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
