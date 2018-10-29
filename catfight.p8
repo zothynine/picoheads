@@ -39,8 +39,8 @@ function _init()
 		collided=false,
 		lives=2,
 		cape={9,10,13},
-		cooldwn=600,
-		cd⧗=600
+		cooldwn=900,
+		cd⧗=900
 	}
 	
 	enemies={
@@ -57,15 +57,21 @@ function _init()
 	
 	enemy_waves={
 		{⧗="0:3:0",
+			swarm=swarms.tri_s,
+			enemy=enemies.mouse,
+			path="slope",
+			x=128,
+			y=50},
+		{⧗="0:6:0",
 			swarm=swarms.tri_l,
 			enemy=enemies.rat,
 			path="wave",
 			x=128,
 			y=50},
-		{⧗="0:6:0",
+		{⧗="0:9:0",
 			swarm=swarms.tri_s,
 			enemy=enemies.mouse,
-			path="linear",
+			path="circle",
 			x=128,
 			y=40}
 	}
@@ -83,9 +89,8 @@ end
 
 function print_right(_txt,_y,_c,_o)
 	local _t=tostr(_txt)
-	local _off=_o
-	if (_o==nil) _off=0
-	print(_t,128-(#_t*4)-_off,_y,_c)
+	_o=_o or 0
+	print(_t,128-(#_t*4)-_o,_y,_c)
 end
 
 function _update60()
@@ -190,29 +195,30 @@ function create_wave(_w)
  	local _x=_w.x+_w.swarm[i][1]
  	local _y=_w.y+_w.swarm[i][2]
 	
-  if _w.path=="linear" then
-   create_enemy(_w.enemy,_x,_y,_w.path)
-  elseif _w.path=="wave" then
+  if _w.path=="linear" or
+  			_w.path=="wave" or
+  			_w.path=="slope" then
    create_enemy(_w.enemy,_x,_y,_w.path)
   elseif _w.path=="circle" then
-   create_enemy(_w.enemy,_x,_y,_w.path,87,127,127,0.25-0.03*i)
+  	local _r=sqrt((_x-127)*(_x-127)+(127-_y)*(127-_y))
+   create_enemy(_w.enemy,_x,_y,_w.path,_r,127,127,0.25-0.003*_w.swarm[i][1])
   end
  end
 end
 
-function create_enemy(_sprt,_x,_y,_f,_r,_originx,_originy,_a)
+function create_enemy(_sprt,_x,_y,_p,_r,_originx,_originy,_a)
  add(enemies,
   {
   	x=_x,
   	y=_y,
   	w=6,
   	h=5,
-  	f=_f,
+  	p=_p,
   	r=_r, --circle radius
   	ox=_originx, --circle center x
   	oy=_originy, --circle center y
-  	a=_a,
-  	sprt=_sprt --initial angle
+  	a=_a, --initial angle
+  	sprt=_sprt 
   })
 end
 
@@ -228,16 +234,24 @@ end
 function update_enemies()
  for i=#enemies,1,-1 do
   local _e=enemies[i]
-  if _e.f=="linear" then
+  if _e.p=="linear" then
    if _e.x+_e.w<0 then
     del(enemies,_e)
    end
    _e.x-=0.5
-  elseif _e.f=="wave" then
+  elseif _e.p=="wave" then
    if (_e.x+_e.w<0) del(enemies,_e)
    _e.x-=0.6
    _e.y-=sin(_e.x/12)
-  elseif _e.f=="circle" then
+  elseif _e.p=="slope" then
+   if _e.x+_e.w<0 then
+    del(enemies,_e)
+   end
+   if _e.x<97 and _e.x>30 and _e.y<87 then
+   	_e.y+=0.8
+   end
+  	_e.x-=0.5
+  elseif _e.p=="circle" then
    if (_e.y>127) del(enemies,_e)
    _e.a+=0.003
    if (_e.a > 1) _e.a=0
@@ -376,7 +390,7 @@ function draw_game()
 	
 	
 	if ascii.collided then
-		if ascii.cd⧗%5==0 then
+		if ⧗.game.f%5==0 then
 			draw_ascii()
 		end		
 	else
