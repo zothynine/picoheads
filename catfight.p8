@@ -191,6 +191,7 @@ function check_shots()
 end
 
 function create_wave(_w)
+	_w.active=true
  for i=1,#_w.swarm do
  	local _x=_w.x+_w.swarm[i][1]
  	local _y=_w.y+_w.swarm[i][2]
@@ -198,27 +199,26 @@ function create_wave(_w)
   if _w.path=="linear" or
   			_w.path=="wave" or
   			_w.path=="slope" then
-   create_enemy(_w.enemy,_x,_y,_w.path)
+   create_enemy(_w,i,_x,_y)
   elseif _w.path=="circle" then
-  	local _r=sqrt((_x-127)*(_x-127)+(127-_y)*(127-_y))
-   create_enemy(_w.enemy,_x,_y,_w.path,_r,127,127,0.25-0.003*_w.swarm[i][1])
+   create_enemy(_w,i,_x,_y,127,127,0.25-0.003)
   end
  end
 end
 
-function create_enemy(_sprt,_x,_y,_p,_r,_originx,_originy,_a)
+function create_enemy(_w,_si,_x,_y,_originx,_originy,_a)
  add(enemies,
   {
   	x=_x,
   	y=_y,
   	w=6,
   	h=5,
-  	p=_p,
-  	r=_r, --circle radius
+  	r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y)), --circle radius
   	ox=_originx, --circle center x
   	oy=_originy, --circle center y
   	a=_a, --initial angle
-  	sprt=_sprt 
+  	∧=_w,
+  	si=_si
   })
 end
 
@@ -234,29 +234,37 @@ end
 function update_enemies()
  for i=#enemies,1,-1 do
   local _e=enemies[i]
-  if _e.p=="linear" then
+  if _e.∧.path=="linear" then
    if _e.x+_e.w<0 then
     del(enemies,_e)
    end
-   _e.x-=0.5
-  elseif _e.p=="wave" then
+   _e.∧.x-=0.1
+   _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
+  elseif _e.∧.path=="wave" then
    if (_e.x+_e.w<0) del(enemies,_e)
-   _e.x-=0.6
-   _e.y-=sin(_e.x/12)
-  elseif _e.p=="slope" then
+   _e.∧.x-=0.1
+   _e.∧.y-=sin(_e.∧.x/24)
+   _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
+   _e.y=_e.∧.y+_e.∧.swarm[_e.si][2]
+  elseif _e.∧.path=="slope" then
    if _e.x+_e.w<0 then
     del(enemies,_e)
    end
-   if _e.x<97 and _e.x>30 and _e.y<87 then
-   	_e.y+=0.8
+   if _e.∧.x<97 and _e.∧.x>30 and _e.∧.y<87 then
+   	_e.∧.y+=0.08
    end
-  	_e.x-=0.5
-  elseif _e.p=="circle" then
+  	_e.∧.x-=0.05
+  	
+  	_e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
+   _e.y=_e.∧.y+_e.∧.swarm[_e.si][2]
+  elseif _e.∧.path=="circle" then
    if (_e.y>127) del(enemies,_e)
    _e.a+=0.003
    if (_e.a > 1) _e.a=0
-   _e.x=_e.ox+_e.r*cos(_e.a)
-   _e.y=_e.oy+_e.r*sin(_e.a)
+   _e.∧.x=_e.ox+_e.r*cos(_e.a)
+   _e.∧.y=_e.oy+_e.r*sin(_e.a)
+   _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
+   _e.y=_e.∧.y+_e.∧.swarm[_e.si][2]
   end
   
   if collision(_e,ascii) then
@@ -362,7 +370,7 @@ function draw_cloud(cloud)
 end
 
 function draw_enemy(_e)
-	local _s=_e.sprt
+	local _s=_e.∧.enemy
 	sspr(_s[1],_s[2],_s[3],_s[4],_e.x,_e.y)
 end
 
@@ -428,7 +436,7 @@ __gfx__
 0000000000000707900009f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000dd000777999999ffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00700700a8888b7b985589f4ff4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000988777770555500ffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000988777440555500ffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000770000777777000550000ff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00700700070000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000700007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
