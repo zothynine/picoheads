@@ -87,9 +87,9 @@ end
 function _draw()
 	cls()
 	map(0,0,0,0,16,16)
-	print("wir entwickeln",10,15,6)
-	print("presented by picoheads",10,25,6)
-	print("episode #11 startet in kuerze",10,35,6)
+	print("wir entwickeln",6,15,6)
+	print("presented by picoheads",6,25,6)
+	print("episode #11 startet in kuerze",6,35,6)
 	spr(0,mx,y,1,2)
 	spr(32,kx,y,1,2)
 	

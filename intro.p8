@@ -14,7 +14,7 @@ function _init()
 		txt2="presented by picoheads",
 		txt3="episode #11:",
 		txt4="externe fremdeinwirkung",
-		x=10,
+		x=6,
 		ln1_y=15,
 		ln2_y=26,
 		ln3_y=98,
