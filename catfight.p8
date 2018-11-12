@@ -31,8 +31,10 @@ function _init()
 	}
 	
 	ascii={
-		x=10,
-		y=10,
+		x=56,
+		y=55,
+		ghost_x=60,
+		ghost_y=100,
 		w=8,
 		h=7,
 		shots={},
@@ -103,6 +105,8 @@ end
 --start
 
 function update_start()
+	update_clouds()
+	update_cape()
 	if btn(5) then
 		_update60=update_game
 		_draw=draw_game
@@ -111,7 +115,15 @@ end
 
 function draw_start()
 	cls()
-	print("press ❎ to start",30,60,7)
+	rectfill(0,0,127,127,1)
+	foreach(clouds,draw_cloud)
+	print_center("catfight",34,0)
+	print_center("catfight",35,7)
+	draw_ascii(2)
+	print_center("press ❎ to start",84,0)
+	print_center("press ❎ to start",85,7)
+	--print("press ❎ to start",30,69,0)
+	--print("press ❎ to start",30,70,7)
 end
 -->8
 --game
@@ -303,9 +315,8 @@ function create_cloud()
 end
 
 function update_clouds()
-	if ⧗.next_cloud==0
-		and #clouds < 25 then
-		create_cloud()
+	if ⧗.next_cloud==0 then
+		if (#clouds < 25) create_cloud()
 		⧗.next_cloud=flr(10+rnd(15))
 	end
 	
@@ -376,15 +387,30 @@ end
 
 function draw_infobar()
 	rectfill(0,0,128,ui_h,2)
-	print("🐱:"..ascii.lives,2,2,7)
+	sspr(13,0,3,4,2,2)
+	-- print("🐱:"..ascii.lives,2,2,7)
+	print(ascii.lives,7,2,7)
 	print_right(score,2,7,1)
 end
 
-function draw_ascii()
+function draw_ascii(_scale,_ghost)
+	local _scale = _scale or 1
+	local _ghost = _ghost or false
 	pal(ascii.cape[1],8)
 	palt(ascii.cape[2],true)
 	palt(ascii.cape[3],true)
-	spr(1,ascii.x,ascii.y)
+	sspr(8,0,8,7,ascii.x,ascii.y,8*_scale,7*_scale)
+	if _ghost then
+		pal(7,6)
+		pal(9,6)
+		pal(7,6)
+		pal(8,6)
+		pal(4,6)
+		pal(11,6)
+		palt(10,true)
+		palt(13,true)
+		sspr(8,0,8,7,ascii.ghost_x,ascii.ghost_y,8*_scale,7*_scale)
+	end
 	pal()
 	palt()
 end
@@ -419,6 +445,20 @@ end
 --game over
 
 function update_gover()
+	update_clouds()
+	ascii.x=60
+	ascii.y=100
+	ascii.ghost_y-=0.6
+		
+	--todo: fertig denken!
+	-- loesung = variable fuer die speed
+	ascii.ghost_x-=0.5	
+	if ascii.ghost_x <= 58 then
+		ascii.ghost_x+=0.5
+	elseif ascii.ghost_x > 62 then
+		ascii.ghost_x-=0.5
+	end
+	
 	if btn(5) then
 		_init()
 		_update60=update_game
@@ -428,9 +468,18 @@ end
 
 function draw_gover()
 	cls()
+	rectfill(0,0,127,127,1)
+	pal(7,5)
+	pal(6,1)
+	foreach(clouds,draw_cloud)
+	pal()
 	local _score_txt="your score is "..score
-	print_center("press ❎ to try again",60,7)
-	print_center("your score is "..score,48,7)
+	print_center("press ❎ to try again",55,0)
+	print_center("press ❎ to try again",56,7)
+	print_center("your score is "..score,42,0)
+	print_center("your score is "..score,43,7)
+	if (ascii.ghost_y >= -7) draw_ascii(2,true)
+	print(ascii.ghost_x,5,5,8)
 end
 __gfx__
 0000000000000707900009f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
