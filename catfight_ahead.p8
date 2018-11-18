@@ -14,6 +14,19 @@ __lua__
 --		map sprites in tab1 verschoben
 --		parallax animation
 
+--  zweite moeglichkeit fuer ghost mit sin
+--  d_ghost_x auf 0.4 setzen
+
+--  wave formation: y abhaengig
+--  von initialem y wert machen
+
+--  kreisformation hinzugefuegt
+
+--  frage: warum wird formation 
+--  langsamer, wenn weniger
+--  enemies da sind (durch ab-
+--  schuss oder out of screen)?
+
 function _init()
 	⧗={
 		game={
@@ -63,14 +76,15 @@ function _init()
 		line4={{0,0},{10,0},{20,0},{30,0}},
 		line6={{0,0},{10,0},{20,0},{30,0},{40,0},{50,0}},
 		tri_s={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10}},
-		tri_l={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10},{30,-15},{30,-5},{30,5},{30,15}}
+		tri_l={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10},{30,-15},{30,-5},{30,5},{30,15}},
+		circle={name="circle",r=15,n=8,a=0.125}
 	}
 	
 	enemy_waves={
 		{⧗="0:3:0",
-			swarm=swarms.tri_s,
+			swarm=swarms.circle,
 			enemy=enemies.mouse,
-			path="slope",
+			path="linear",
 			x=128,
 			y=50},
 		{⧗="0:6:0",
@@ -80,9 +94,15 @@ function _init()
 			x=128,
 			y=50},
 		{⧗="0:9:0",
-			swarm=swarms.tri_s,
+		 swarm=swarms.tri_s,
 			enemy=enemies.mouse,
 			path="circle",
+			x=128,
+			y=40},
+		{⧗="0:12:0",
+			swarm=swarms.line6,
+			enemy=enemies.rat,
+			path="linear",
 			x=128,
 			y=40}
 	}
@@ -213,15 +233,26 @@ function check_shots()
 end
 
 function create_wave(_w)
-	_w.active=true
- for i=1,#_w.swarm do
- 	local _x=_w.x+_w.swarm[i][1]
- 	local _y=_w.y+_w.swarm[i][2]
+	local _n=#_w.swarm
+	local _s_name=_w.swarm.name
+	local _x=0
+	local _y=0
+	if (_s_name=="circle") _n=_w.swarm.n 
+ for i=1,_n do
+  local _a=nil
+ 	if _s_name=="circle" then
+			_a=i*_w.swarm.a
+	 	_x=_w.x+_w.swarm.r*cos(_a)
+	 	_y=_w.y+_w.swarm.r*sin(_a)
+ 	else
+ 		_x=_w.x+_w.swarm[i][1]
+	 	_y=_w.y+_w.swarm[i][2]
+ 	end
 	
   if _w.path=="linear" or
   			_w.path=="wave" or
   			_w.path=="slope" then
-   create_enemy(_w,i,_x,_y)
+   create_enemy(_w,i,_x,_y,nil,nil,_a)
   elseif _w.path=="circle" then
    create_enemy(_w,i,_x,_y,127,127,0.25-0.003)
   end
@@ -256,18 +287,33 @@ end
 function update_enemies()
  for i=#enemies,1,-1 do
   local _e=enemies[i]
+  -- linear movement
   if _e.∧.path=="linear" then
    if _e.x+_e.w<0 then
     del(enemies,_e)
    end
    _e.∧.x-=0.1
-   _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
+   if _e.∧.swarm.name=="circle" then
+    _e.x=_e.∧.x+_e.∧.swarm.r*cos(_e.a)
+	   _e.y=_e.∧.y+_e.∧.swarm.r*sin(_e.a)
+	   if _e.∧.x<=70 then
+	    _e.∧.x+=0.1
+	    _e.a+=0.01
+ 	   _e.x=_e.∧.x+_e.∧.swarm.r*cos(_e.a)
+		   _e.y=_e.∧.y+_e.∧.swarm.r*sin(_e.a)
+	   end
+   else
+    _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
+   end
+  -- wave movement
   elseif _e.∧.path=="wave" then
    if (_e.x+_e.w<0) del(enemies,_e)
-   _e.∧.x-=0.1
-   _e.∧.y-=sin(_e.∧.x/24)
+   _e.∧.x-=0.05
+   wavex=_e.∧.x
+   wavey=_e.∧.y+(sin(_e.∧.x/12)*10)
    _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
-   _e.y=_e.∧.y+_e.∧.swarm[_e.si][2]
+   _e.y=wavey+_e.∧.swarm[_e.si][2]
+  -- slope movement
   elseif _e.∧.path=="slope" then
    if _e.x+_e.w<0 then
     del(enemies,_e)
@@ -279,6 +325,7 @@ function update_enemies()
   	
   	_e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
    _e.y=_e.∧.y+_e.∧.swarm[_e.si][2]
+  -- quarter circle movement
   elseif _e.∧.path=="circle" then
    if (_e.y>127) del(enemies,_e)
    _e.a+=0.003
@@ -481,8 +528,10 @@ function update_gover()
 	if ⧗.game.f<30 then
 		ascii.ghost_x-=0.2
 	else
-		ascii.ghost_x+=0.2
+	 ascii.ghost_x+=0.2
 	end
+	
+	--ascii.ghost_x=60+(sin(ascii.ghost_y/12)*10)
 	
 	if btn(5) then
 		_init()
