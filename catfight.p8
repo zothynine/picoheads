@@ -8,112 +8,114 @@ __lua__
 -- 01 explosion
 
 function _init()
-	⧗={
-		game={
-		 m=0,
-		 s=0,
-		 f=0,
-		 str="0:0:0"
-		},
-		cape=12,
-		next_cloud=0
-	}
-	
-	ui_h=8
-	
-	score=0
-	
-	clouds={}
-	
-	maps={
-		gnd1_x=0,
-		gnd2_x=128,
-		plxa1_x=0,
-		plxa2_x=128,
-		plxb1_x=0,
-		plxb2_x=128,
-	}
-	
-	ascii={
-		x=56,
-		y=55,
-		ghost_x=60,
-		ghost_y=100,
-		w=8,
-		h=7,
-		shots={},
-		collided=false,
-		lives=2,
-		cape={9,10,13},
-		cooldwn=900,
-		cd⧗=900
-	}
+  tim={
+    game={
+      m=0,
+      s=0,
+      f=0,
+      str="0:0:0"
+    },
+    cape=12,
+    next_cloud=0
+  }
 
-	shots={}
-	
-	enemies={
-		rat={16,0,6,5},
-		mouse={22,0,6,5}
-	}
-	
-	swarms={
-		line4={{0,0},{10,0},{20,0},{30,0}},
-		line6={{0,0},{10,0},{20,0},{30,0},{40,0},{50,0}},
-		tri_s={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10}},
-		tri_l={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10},{30,-15},{30,-5},{30,5},{30,15}},
-		circle={name="circle",r=15,n=8,a=0.125}
-	}
-	
-	enemy_waves={
-		{⧗="0:3:0",
-			swarm=swarms.line4,
-			enemy=enemies.mouse,
-			path="linear",
-			x=128,
-			y=50,
-			shots={iv=0}},
-		{⧗="0:6:0",
-			swarm=swarms.tri_l,
-			enemy=enemies.rat,
-			path="wave",
-			x=128,
-			y=50},
-		{⧗="0:9:0",
-			swarm=swarms.tri_s,
-			enemy=enemies.mouse,
-			path="circle",
-			x=128,
-			y=40}
-	}
-	
-	enemies={}
-	
-	_update60=update_start
-	_draw=draw_start
+  ui_h=8
+
+  score=0
+
+  clouds={}
+
+  maps={
+    gnd1_x=0,
+    gnd2_x=128,
+    plxa1_x=0,
+    plxa2_x=128,
+    plxb1_x=0,
+    plxb2_x=128,
+  }
+
+  ascii={
+    x=56,
+    y=55,
+    ghost_x=60,
+    ghost_y=100,
+    w=8,
+    h=7,
+    shots={},
+    collided=false,
+    lives=2,
+    cape={9,10,13},
+    cooldwn=900,
+    cdtim=900
+  }
+
+  shots={}
+
+  enemies={
+    rat={16,0,6,5},
+    mouse={22,0,6,5}
+  }
+
+  swarms={
+    line4={{0,0},{10,0},{20,0},{30,0}},
+    line6={{0,0},{10,0},{20,0},{30,0},{40,0},{50,0}},
+    tri_s={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10}},
+    tri_l={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10},{30,-15},{30,-5},{30,5},{30,15}},
+    circle={name="circle",r=15,n=8,a=0.125}
+  }
+
+  enemy_waves={
+    {tim="0:3:0",
+      swarm=swarms.circle,
+      enemy=enemies.mouse,
+      path="linear",
+      x=128,
+      y=50,
+      shots={iv=0}},
+    {tim="0:6:0",
+      swarm=swarms.tri_l,
+      enemy=enemies.rat,
+      path="wave",
+      x=128,
+      y=50,
+      shots={iv=0}},
+    {tim="0:9:0",
+      swarm=swarms.tri_s,
+      enemy=enemies.mouse,
+      path="circle",
+      x=128,
+      y=40,
+      shots={iv=0}}
+  }
+
+  enemies={}
+
+  _update60=update_start
+  _draw=draw_start
 end
 
 function print_center(_txt,_y,_c)
-	local _t=tostr(_txt)
-	print(_t,(128-(#_t*4))/2,_y,_c)
+  local _t=tostr(_txt)
+  print(_t,(128-(#_t*4))/2,_y,_c)
 end
 
 function print_right(_txt,_y,_c,_o)
-	local _t=tostr(_txt)
-	_o=_o or 0
-	print(_t,128-(#_t*4)-_o,_y,_c)
+  local _t=tostr(_txt)
+  _o=_o or 0
+  print(_t,128-(#_t*4)-_o,_y,_c)
 end
 
 function update_game_timer()
- ⧗.game.f+=1
- if ⧗.game.f==59 then
-  ⧗.game.f=0
-  ⧗.game.s+=1
- end
- if ⧗.game.s==59 then
-  ⧗.game.s=0
-  ⧗.game.m+=1
- end
- ⧗.game.str=⧗.game.m..":"..⧗.game.s..":"..⧗.game.f
+  tim.game.f+=1
+  if tim.game.f==59 then
+    tim.game.f=0
+    tim.game.s+=1
+  end
+  if tim.game.s==59 then
+    tim.game.s=0
+    tim.game.m+=1
+  end
+  tim.game.str=tim.game.m..":"..tim.game.s..":"..tim.game.f
 end
 
 function _update60()
@@ -126,442 +128,440 @@ end
 --start
 
 function update_start()
-	update_clouds()
-	update_cape()
-	if btn(5) then
-		_update60=update_game
-		_draw=draw_game
-	end
+  update_clouds()
+  update_cape()
+  if btn(5) then
+    _update60=update_game
+    _draw=draw_game
+  end
 end
 
 function draw_start()
-	cls()
-	rectfill(0,0,127,127,1)
-	foreach(clouds,draw_cloud)
-	print_center("catfight",34,0)
-	print_center("catfight",35,7)
-	draw_ascii(2)
-	print_center("press ❎ to start",84,0)
-	print_center("press ❎ to start",85,7)
-	--print("press ❎ to start",30,69,0)
-	--print("press ❎ to start",30,70,7)
+  cls()
+  rectfill(0,0,127,127,1)
+  foreach(clouds,draw_cloud)
+  print_center("catfight",34,0)
+  print_center("catfight",35,7)
+  draw_ascii(2)
+  print_center("press ❎ to start",84,0)
+  print_center("press ❎ to start",85,7)
+  --print("press ❎ to start",30,69,0)
+  --print("press ❎ to start",30,70,7)
 end
 -->8
 --game
 function collision(_a,_b)
-	--test if shot hits emeny
-	
-	if _a.x+_a.w>=_b.x
-		and _a.x<_b.x+_b.w
-		and _a.y+_a.h>=_b.y
-		and _a.y<=_b.y+_b.h then
-		return true
-	else
-		return false
-	end 
+  --test if shot hits emeny
+
+  if _a.x+_a.w>=_b.x
+    and _a.x<_b.x+_b.w
+    and _a.y+_a.h>=_b.y
+    and _a.y<=_b.y+_b.h then
+    return true
+  else
+    return false
+  end
 end
 
 function move_ascii()
-	if btn(0) then
-		--links ⬅️
-		ascii.x=mid(0,ascii.x-1,127)
-	elseif btn(1) then
-		--rechts ➡️
-		ascii.x=mid(0,ascii.x+1,120)
-	elseif btn(2) then
-		--oben ⬆️
-		ascii.y=mid(0,ascii.y-1,127)
-	elseif btn(3) then
-		--unten ⬇️
-		ascii.y=mid(0,ascii.y+1,121)
-	end
+  if btn(0) then
+    --links ⬅️
+    ascii.x=mid(0,ascii.x-1,127)
+  elseif btn(1) then
+    --rechts ➡️
+    ascii.x=mid(0,ascii.x+1,120)
+  elseif btn(2) then
+    --oben ⬆️
+    ascii.y=mid(0,ascii.y-1,127)
+  elseif btn(3) then
+    --unten ⬇️
+    ascii.y=mid(0,ascii.y+1,121)
+  end
 end
 
 function shoot()
-	add(ascii.shots,{
-		x=ascii.x+6,
-		y=ascii.y+2,
-		w=3,
-		h=1,
-		spd=2
-	})
-	sfx(0)
+  add(ascii.shots,{
+    x=ascii.x+6,
+    y=ascii.y+2,
+    w=3,
+    h=1,
+    spd=2
+  })
+  sfx(0)
 end
 
 function check_shots()
-	for i=#ascii.shots,1,-1 do
-		local _shot=ascii.shots[i]
-		local _x=_shot.x
-		
-		_shot.x+=_shot.spd
-		
-		-- delete shot when out of bounds
-		if (_x>127) del(ascii.shots,_shot)
-	
-		for i=#enemies,1,-1 do
-			local _e=enemies[i]
-			if collision(_shot,_e) then
-				del(enemies,_e)
-				del(ascii.shots,_shot)
-				sfx(1)
-				score+=1
-			end
-		end
-	end
+  for i=#ascii.shots,1,-1 do
+    local _shot=ascii.shots[i]
+    local _x=_shot.x
 
-	for i=#shots,1,-1 do
-		local _shot=shots[i]
-		local _x=_shot.x
-		
-		_shot.x-=2
-		
-		-- delete shot when out of bounds
-		if (_x+_shot.w<0) del(shots,_shot)	
-		
-		if collision(_shot,ascii) then
-			ascii_hit()
-			del(ascii.shots,_shot)
-			sfx(1)
-		end
-	end
+    _shot.x+=_shot.spd
+
+    -- delete shot when out of bounds
+    if (_x>127) del(ascii.shots,_shot)
+
+    for i=#enemies,1,-1 do
+      local _e=enemies[i]
+      if collision(_shot,_e) then
+        del(enemies,_e)
+        del(ascii.shots,_shot)
+        sfx(1)
+        score+=1
+      end
+    end
+  end
+
+  for i=#shots,1,-1 do
+    local _shot=shots[i]
+    local _x=_shot.x
+
+    _shot.x-=2
+
+    -- delete shot when out of bounds
+    if (_x+_shot.w<0) del(shots,_shot)
+
+    if collision(_shot,ascii) then
+      ascii_hit()
+      del(shots,_shot)
+      sfx(1)
+    end
+  end
 end
 
 function create_wave(_w)
-	local _n=#_w.swarm
-	if (_w.swarm.name=="circle") _n=_w.swarm.n
-	local _x=0
-	local _y=0
- for i=1,_n do
- 	local _a=nil
-	if _w.swarm.name=="circle" then
-		_a=i*_w.swarm.a
-		_x=_w.x+_w.swarm.r*cos(_a)
-		_y=_w.y+_w.swarm.r*sin(_a)
-	else
-		_x=_w.x+_w.swarm[i][1]
-		_y=_w.y+_w.swarm[i][2]
-	end
-	
-  if _w.path=="linear" or
-  			_w.path=="wave" or
-  			_w.path=="slope" then
-   create_enemy(_w,i,_x,_y,nil,nil,_a)
-  elseif _w.path=="circle" then
-   create_enemy(_w,i,_x,_y,127,127,0.25-0.003)
+  local _n=#_w.swarm
+  if (_w.swarm.name=="circle") _n=_w.swarm.n
+  local _x=0
+  local _y=0
+  for i=1,_n do
+    local _a=nil
+    if _w.swarm.name=="circle" then
+      _a=i*_w.swarm.a
+      _x=_w.x+_w.swarm.r*cos(_a)
+      _y=_w.y+_w.swarm.r*sin(_a)
+    else
+      _x=_w.x+_w.swarm[i][1]
+      _y=_w.y+_w.swarm[i][2]
+    end
+
+    if _w.path=="linear" or
+      _w.path=="wave" or
+      _w.path=="slope" then
+      create_enemy(_w,i,_x,_y,nil,nil,_a)
+    elseif _w.path=="circle" then
+      create_enemy(_w,i,_x,_y,127,127,0.25-0.003)
+    end
   end
- end
 end
 
 function create_enemy(_w,_si,_x,_y,_originx,_originy,_a)
- add(enemies,
-  {
-  	x=_x,
-  	y=_y,
-  	w=6,
-  	h=5,
-  	r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y)), --circle radius
-  	ox=_originx, --circle center x
-  	oy=_originy, --circle center y
-  	a=_a, --initial angle
-  	∧=_w,
-  	si=_si
-  })
+  add(enemies,
+    {
+      x=_x,
+      y=_y,
+      w=6,
+      h=5,
+      r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y)), --circle radius
+      ox=_originx, --circle center x
+      oy=_originy, --circle center y
+      a=_a, --initial angle
+      wav=_w,
+      si=_si
+    }
+  )
 end
 
 function update_waves()
-	local _f=enemy_waves[1]
-	if (#enemy_waves==0) return
-	if _f.⧗==⧗.game.str then
-		create_wave(_f)
-		del(enemy_waves,_f)
-	end
+  local _f=enemy_waves[1]
+  if (#enemy_waves==0) return
+  if _f.tim==tim.game.str then
+    create_wave(_f)
+    del(enemy_waves,_f)
+  end
 end
 
 function update_enemies()
- for i=#enemies,1,-1 do
-  local _e=enemies[i]
-  if _e.∧.path=="linear" then
-   if _e.x+_e.w<0 then
-    del(enemies,_e)
-   end
-   _e.∧.x-=0.1
-   if _e.∧.swarm.name=="circle" then
-	_e.x=_e.∧.x+_e.∧.swarm.r*cos(_e.a)
-	_e.y=_e.∧.y+_e.∧.swarm.r*sin(_e.a)
-	if _e.∧.x<=70 then
-		_e.∧.x+=0.1
-		_e.a+=0.01
-		_e.x=_e.∧.x+_e.∧.swarm.r*cos(_e.a)
-		_e.y=_e.∧.y+_e.∧.swarm.r*sin(_e.a)
-	end
-   else
-	_e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
-   end  
-  elseif _e.∧.path=="wave" then
-   if (_e.x+_e.w<0) del(enemies,_e)
-   _e.∧.x-=0.05
-   local _wave_y=_e.∧.y+(sin(_e.∧.x/12)*10)
-   _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
-   _e.y=_wave_y+_e.∧.swarm[_e.si][2]
-  elseif _e.∧.path=="slope" then
-   if _e.x+_e.w<0 then
-    del(enemies,_e)
-   end
-   if _e.∧.x<97 and _e.∧.x>30 and _e.∧.y<87 then
-   	_e.∧.y+=0.08
-   end
-  	_e.∧.x-=0.05
-  	
-  	_e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
-   _e.y=_e.∧.y+_e.∧.swarm[_e.si][2]
-  elseif _e.∧.path=="circle" then
-   if (_e.y>127) del(enemies,_e)
-   _e.a+=0.003
-   if (_e.a > 1) _e.a=0
-   _e.∧.x=_e.ox+_e.r*cos(_e.a)
-   _e.∧.y=_e.oy+_e.r*sin(_e.a)
-   _e.x=_e.∧.x+_e.∧.swarm[_e.si][1]
-   _e.y=_e.∧.y+_e.∧.swarm[_e.si][2]
+  for i=#enemies,1,-1 do
+    local _e=enemies[i]
+    if _e.wav.path=="linear" then
+      if _e.x+_e.w<0 then
+        del(enemies,_e)
+      end
+      _e.wav.x-=0.1
+      if _e.wav.swarm.name=="circle" then
+        _e.x=_e.wav.x+_e.wav.swarm.r*cos(_e.a)
+        _e.y=_e.wav.y+_e.wav.swarm.r*sin(_e.a)
+        if _e.wav.x<=70 then
+          _e.wav.x+=0.1
+          _e.a+=0.01
+          _e.x=_e.wav.x+_e.wav.swarm.r*cos(_e.a)
+          _e.y=_e.wav.y+_e.wav.swarm.r*sin(_e.a)
+        end
+      else
+        _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
+      end
+    elseif _e.wav.path=="wave" then
+      if (_e.x+_e.w<0) del(enemies,_e)
+      _e.wav.x-=0.05
+      local _wave_y=_e.wav.y+(sin(_e.wav.x/12)*10)
+      _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
+      _e.y=_wave_y+_e.wav.swarm[_e.si][2]
+    elseif _e.wav.path=="slope" then
+      if (_e.x+_e.w<0) del(enemies,_e)
+      if _e.wav.x<97 and _e.wav.x>30 and _e.wav.y<87 then
+        _e.wav.y+=0.08
+      end
+      _e.wav.x-=0.05
+      _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
+      _e.y=_e.wav.y+_e.wav.swarm[_e.si][2]
+    elseif _e.wav.path=="circle" then
+      if (_e.y>127) del(enemies,_e)
+      _e.a+=0.003
+      if (_e.a > 1) _e.a=0
+      _e.wav.x=_e.ox+_e.r*cos(_e.a)
+      _e.wav.y=_e.oy+_e.r*sin(_e.a)
+      _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
+      _e.y=_e.wav.y+_e.wav.swarm[_e.si][2]
+    end
+
+    if _e.wav.shots then
+      if _e.wav.shots.iv==tim.game.f
+      and _e.x < 128-_e.w then
+        add(shots,{x=_e.x,y=_e.y+3,w=3,h=1})
+      end
+    end
+
+    if collision(_e,ascii) then
+      ascii_hit()
+    end
+
+    if ascii.collided then
+      ascii.cdtim-=1
+
+      if ascii.cdtim==0 then
+        ascii.collided=false
+        ascii.cdtim=ascii.cooldwn
+      end
+    end
   end
-  
-  if _e.∧.shots then
-	if _e.∧.shots.iv==⧗.game.f
-	and _e.x < 128-_e.w then
-		add(shots,{x=_e.x,y=_e.y+3,w=3,h=1})
-	end
-  end
-  
-  if collision(_e,ascii) then
-	ascii_hit()
-  end
-  
-  if ascii.collided then
-  	ascii.cd⧗-=1
-  	
-  	if ascii.cd⧗==0 then
-  		ascii.collided=false
-  		ascii.cd⧗=ascii.cooldwn
-  	end
-  end
- end
 end
 
 function ascii_hit()
-  	if not ascii.collided then
-  		ascii.lives-=1
-  		ascii.collided=true
-  	end
-  	
-  	if ascii.lives<0 then
-  		_update60=update_gover
-  		_draw=draw_gover
-  	end
+  if not ascii.collided then
+    ascii.lives-=1
+    ascii.collided=true
+  end
+
+  if ascii.lives<0 then
+    _update60=update_gover
+    _draw=draw_gover
+  end
 end
 
 function create_cloud()
-	local _scale=0.8+rnd(1.5)
-	local _y=ui_h-((5*_scale)/2)
-	
-	add(clouds,{
-		x=135,
-		y=_y+flr(rnd(15)),
-		dx=0.2+rnd(0.5),
-		scl=_scale
-	})
+  local _scale=0.8+rnd(1.5)
+  local _y=ui_h-((5*_scale)/2)
+
+  add(clouds,{
+    x=135,
+    y=_y+flr(rnd(15)),
+    dx=0.2+rnd(0.5),
+    scl=_scale
+  })
 end
 
 function update_clouds()
-	if ⧗.next_cloud==0 then
-		if (#clouds < 25) create_cloud()
-		⧗.next_cloud=flr(10+rnd(15))
-	end
-	
-	for i=#clouds,1,-1 do
-		local _cloud=clouds[i]
-		_cloud.x-=_cloud.dx
-		if (_cloud.x < -8) del(clouds,_cloud)
-	end
-	
-	⧗.next_cloud-=1
+  if tim.next_cloud==0 then
+    if (#clouds < 25) create_cloud()
+    tim.next_cloud=flr(10+rnd(15))
+  end
+
+  for i=#clouds,1,-1 do
+    local _cloud=clouds[i]
+    _cloud.x-=_cloud.dx
+    if (_cloud.x < -8) del(clouds,_cloud)
+  end
+
+  tim.next_cloud-=1
 end
 
 function update_map()
-	maps.gnd1_x-=1
-	maps.gnd2_x-=1
-	maps.plxa1_x-=0.5
-	maps.plxa2_x-=0.5
-	maps.plxb1_x-=0.2
-	maps.plxb2_x-=0.2
-	if (maps.gnd1_x<=-128) maps.gnd1_x=128
-	if (maps.gnd2_x<=-128) maps.gnd2_x=128
-	if (maps.plxa1_x<=-128) maps.plxa1_x=128
-	if (maps.plxa2_x<=-128) maps.plxa2_x=128
-	if (maps.plxb1_x<=-128) maps.plxb1_x=128
-	if (maps.plxb2_x<=-128) maps.plxb2_x=128
+  maps.gnd1_x-=1
+  maps.gnd2_x-=1
+  maps.plxa1_x-=0.5
+  maps.plxa2_x-=0.5
+  maps.plxb1_x-=0.2
+  maps.plxb2_x-=0.2
+  if (maps.gnd1_x<=-128) maps.gnd1_x=128
+  if (maps.gnd2_x<=-128) maps.gnd2_x=128
+  if (maps.plxa1_x<=-128) maps.plxa1_x=128
+  if (maps.plxa2_x<=-128) maps.plxa2_x=128
+  if (maps.plxb1_x<=-128) maps.plxb1_x=128
+  if (maps.plxb2_x<=-128) maps.plxb2_x=128
 end
 
 function update_cape()
-	⧗.cape-=1
-	if ⧗.cape==8 then
-		ascii.cape={10,13,9}
-	elseif ⧗.cape==4 then
-		ascii.cape={13,9,10}
-	elseif ⧗.cape==0 then
-		ascii.cape={9,10,13}
-		⧗.cape=12
-	end
+  tim.cape-=1
+  if tim.cape==8 then
+    ascii.cape={10,13,9}
+  elseif tim.cape==4 then
+    ascii.cape={13,9,10}
+  elseif tim.cape==0 then
+    ascii.cape={9,10,13}
+    tim.cape=12
+  end
 end
 
 function update_game()
- update_game_timer()
- update_clouds()
- update_map()
- update_cape()
- update_waves()
- 
- update_enemies()
-	
-	move_ascii()
-		
-	if btnp(5) then
-		shoot()
-	end
-	
-	check_shots()
+  update_game_timer()
+  update_clouds()
+  update_map()
+  update_cape()
+  update_waves()
+
+  update_enemies()
+
+  move_ascii()
+
+  if btnp(5) then
+    shoot()
+  end
+
+  check_shots()
 end
 
 
 function draw_shots()
-	for i=1,#ascii.shots do
-		local _x=ascii.shots[i].x
-		local _y=ascii.shots[i].y
-		local _w=ascii.shots[i].w
-		line(_x,_y,_x+_w,_y,8)
-	end
+  for i=1,#ascii.shots do
+    local _x=ascii.shots[i].x
+    local _y=ascii.shots[i].y
+    local _w=ascii.shots[i].w
+    line(_x,_y,_x+_w,_y,8)
+  end
 
-	for i=1,#shots do
-		local _x=shots[i].x
-		local _y=shots[i].y
-		local _w=shots[i].w
-		line(_x,_y,_x+_w,_y,11)
-	end
+  for i=1,#shots do
+    local _x=shots[i].x
+    local _y=shots[i].y
+    local _w=shots[i].w
+    line(_x,_y,_x+_w,_y,11)
+  end
 end
 
 function draw_cloud(cloud)
-	sspr(o,8,9,6,cloud.x,cloud.y,9*cloud.scl,5*cloud.scl)
+  sspr(o,8,9,6,cloud.x,cloud.y,9*cloud.scl,5*cloud.scl)
 end
 
 function draw_enemy(_e)
-	local _s=_e.∧.enemy
-	sspr(_s[1],_s[2],_s[3],_s[4],_e.x,_e.y)
+  local _s=_e.wav.enemy
+  sspr(_s[1],_s[2],_s[3],_s[4],_e.x,_e.y)
 end
 
 function draw_infobar()
-	rectfill(0,0,128,ui_h,2)
-	sspr(13,0,3,4,2,2)
-	-- print("🐱:"..ascii.lives,2,2,7)
-	print(ascii.lives,7,2,7)
-	print_right(score,2,7,1)
+  rectfill(0,0,128,ui_h,2)
+  sspr(13,0,3,4,2,2)
+  -- print("🐱:"..ascii.lives,2,2,7)
+  print(ascii.lives,7,2,7)
+  print_right(score,2,7,1)
 end
 
 function draw_ascii(_scale,_ghost)
-	local _scale = _scale or 1
-	local _ghost = _ghost or false
-	pal(ascii.cape[1],8)
-	palt(ascii.cape[2],true)
-	palt(ascii.cape[3],true)
-	sspr(8,0,8,7,ascii.x,ascii.y,8*_scale,7*_scale)
-	if _ghost then
-		pal(7,6)
-		pal(9,6)
-		pal(7,6)
-		pal(8,6)
-		pal(4,6)
-		pal(11,6)
-		palt(10,true)
-		palt(13,true)
-		sspr(8,0,8,7,ascii.ghost_x,ascii.ghost_y,8*_scale,7*_scale)
-	end
-	pal()
-	palt()
+  local _scale = _scale or 1
+  local _ghost = _ghost or false
+  pal(ascii.cape[1],8)
+  palt(ascii.cape[2],true)
+  palt(ascii.cape[3],true)
+  sspr(8,0,8,7,ascii.x,ascii.y,8*_scale,7*_scale)
+  if _ghost then
+    pal(7,6)
+    pal(9,6)
+    pal(7,6)
+    pal(8,6)
+    pal(4,6)
+    pal(11,6)
+    palt(10,true)
+    palt(13,true)
+    sspr(8,0,8,7,ascii.ghost_x,ascii.ghost_y,8*_scale,7*_scale)
+  end
+  pal()
+  palt()
 end
 
 function draw_map()
-	--parallax b
-	map(0,10,maps.plxb1_x,80,16,6)
-	map(0,10,maps.plxb2_x,80,16,6)
-	--parallax a
-	map(0,8,maps.plxa1_x,110,16,2)
-	map(0,8,maps.plxa2_x,110,16,2)
-	--ground
-	map(0,15,maps.gnd1_x,120,16,1)
-	map(0,15,maps.gnd2_x,120,16,1)
+  --parallax b
+  map(0,10,maps.plxb1_x,80,16,6)
+  map(0,10,maps.plxb2_x,80,16,6)
+  --parallax a
+  map(0,8,maps.plxa1_x,110,16,2)
+  map(0,8,maps.plxa2_x,110,16,2)
+  --ground
+  map(0,15,maps.gnd1_x,120,16,1)
+  map(0,15,maps.gnd2_x,120,16,1)
 end
 
 function draw_game()
-	cls()
-	rectfill(0,0,127,127,1)
-	draw_map()
-	foreach(clouds,draw_cloud)
+  cls()
+  rectfill(0,0,127,127,1)
+  draw_map()
+  foreach(clouds,draw_cloud)
 
-	if ascii.collided then
-		if ⧗.game.f%5==0 then
-			draw_ascii()
-		end		
-	else
-		draw_ascii()
-	end
-	
-	foreach(enemies,draw_enemy)
-	draw_shots()
-	draw_infobar()
+  if ascii.collided then
+    if tim.game.f%5==0 then
+      draw_ascii()
+    end
+  else
+    draw_ascii()
+  end
 
- --if #clouds>0 then
- --print(#clouds,5,12,8)
- --end
+  foreach(enemies,draw_enemy)
+  draw_shots()
+  draw_infobar()
+
+  --if #clouds>0 then
+  --print(#clouds,5,12,8)
+  --end
 end
 -->8
 --game over
 
 function update_gover()
- 	update_game_timer()
-	update_clouds()
-	ascii.x=60
-	ascii.y=100
-	ascii.ghost_y-=0.6
+  update_game_timer()
+  update_clouds()
+  ascii.x=60
+  ascii.y=100
+  ascii.ghost_y-=0.6
 
-	-- if ⧗.game.f<30 then
-	-- 	ascii.ghost_x-=0.2
-	-- else
-	-- 	ascii.ghost_x+=0.2
-	-- end
+  -- if tim.game.f<30 then
+  -- 	ascii.ghost_x-=0.2
+  -- else
+  -- 	ascii.ghost_x+=0.2
+  -- end
 
-	ascii.ghost_x=ascii.x+(sin(ascii.ghost_y/12)*10)
-	
-	if btn(5) then
-		_init()
-		_update60=update_game
-		_draw=draw_game
-	end
+  ascii.ghost_x=ascii.x+(sin(ascii.ghost_y/12)*10)
+
+  if btn(5) then
+    _init()
+    _update60=update_game
+    _draw=draw_game
+  end
 end
 
 function draw_gover()
-	cls()
-	rectfill(0,0,127,127,1)
-	pal(7,5)
-	pal(6,1)
-	foreach(clouds,draw_cloud)
-	pal()
-	local _score_txt="your score is "..score
-	print_center("press ❎ to try again",55,0)
-	print_center("press ❎ to try again",56,7)
-	print_center("your score is "..score,42,0)
-	print_center("your score is "..score,43,7)
-	if ascii.ghost_y >= -7 then
-		draw_ascii(2,true)
-	else
-		draw_ascii(2)
-	end
+  cls()
+  rectfill(0,0,127,127,1)
+  pal(7,5)
+  pal(6,1)
+  foreach(clouds,draw_cloud)
+  pal()
+  local _score_txt="your score is "..score
+  print_center("press ❎ to try again",55,0)
+  print_center("press ❎ to try again",56,7)
+  print_center("your score is "..score,42,0)
+  print_center("your score is "..score,43,7)
+  if ascii.ghost_y >= -7 then
+    draw_ascii(2,true)
+  else
+    draw_ascii(2)
+  end
 end
 __gfx__
 0000000000000707900009f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
