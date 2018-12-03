@@ -8,6 +8,8 @@ __lua__
 -- 01 explosion
 
 function _init()
+  lvltim=180
+
   tim={
     game={
       m=0,
@@ -15,6 +17,7 @@ function _init()
       f=0,
       str="0:0:0"
     },
+    lvlstart=lvltim,
     cape=12,
     next_cloud=0
   }
@@ -64,29 +67,36 @@ function _init()
     circle={name="circle",r=15,n=8,a=0.125}
   }
 
-  enemy_waves={
-    {tim="0:3:0",
-      swarm=swarms.circle,
-      enemy=enemies.mouse,
-      path="linear",
-      x=128,
-      y=50,
-      shots={iv=0}},
-    {tim="0:6:0",
-      swarm=swarms.tri_l,
-      enemy=enemies.rat,
-      path="wave",
-      x=128,
-      y=50,
-      shots={iv=0}},
-    {tim="0:9:0",
-      swarm=swarms.tri_s,
-      enemy=enemies.mouse,
-      path="circle",
-      x=128,
-      y=40,
-      shots={iv=0}}
+  levels={
+    {
+      {tim="0:3:0",
+        swarm=swarms.circle,
+        enemy=enemies.mouse,
+        path="linear",
+        x=128,
+        y=50,
+        shots={iv=0},
+        count=swarms.circle.n},
+      {tim="0:6:0",
+        swarm=swarms.tri_l,
+        enemy=enemies.rat,
+        path="wave",
+        x=128,
+        y=50,
+        shots={iv=0},
+        count=#swarms.tri_l},
+      {tim="0:9:0",
+        swarm=swarms.tri_s,
+        enemy=enemies.mouse,
+        path="circle",
+        x=128,
+        y=40,
+        shots={iv=0},
+        count=#swarms.tri_s}
+    }
   }
+
+  enemy_waves={}
 
   enemies={}
 
@@ -118,12 +128,14 @@ function update_game_timer()
   tim.game.str=tim.game.m..":"..tim.game.s..":"..tim.game.f
 end
 
+function setuplvl()
+end
+
 function _update60()
 end
 
 function _draw()
 end
-
 -->8
 --start
 
@@ -131,8 +143,8 @@ function update_start()
   update_clouds()
   update_cape()
   if btn(5) then
-    _update60=update_game
-    _draw=draw_game
+    _update60=update_lvlstart
+    _draw=draw_lvlstart
   end
 end
 
@@ -147,6 +159,28 @@ function draw_start()
   print_center("press ❎ to start",85,7)
   --print("press ❎ to start",30,69,0)
   --print("press ❎ to start",30,70,7)
+end
+-->8
+--game start
+function update_lvlstart()
+  update_clouds()
+  update_cape()
+  tim.lvlstart -= 1
+  if tim.lvlstart < 1 then
+    _update60=update_game
+    _draw=draw_game
+    enemy_waves=levels[1]
+    tim.lvlstart=lvltim
+  end
+end
+
+function draw_lvlstart()
+  cls()
+  rectfill(0,0,127,127,1)
+  foreach(clouds,draw_cloud)
+  draw_ascii(2)
+  print_center("level 1", 84, 0)
+  print_center("level 1", 85, 7)
 end
 -->8
 --game
@@ -203,7 +237,7 @@ function check_shots()
     for i=#enemies,1,-1 do
       local _e=enemies[i]
       if collision(_shot,_e) then
-        del(enemies,_e)
+        delete_enemy(_e)
         del(ascii.shots,_shot)
         sfx(1)
         score+=1
@@ -280,12 +314,18 @@ function update_waves()
   end
 end
 
+function delete_enemy(_e)
+  _e.wav.count-=1
+  del(enemies,_e)
+  if (_e.wav.count==0) del(enemy_waves, _e.wav)
+end
+
 function update_enemies()
   for i=#enemies,1,-1 do
     local _e=enemies[i]
     if _e.wav.path=="linear" then
       if _e.x+_e.w<0 then
-        del(enemies,_e)
+        delete_enemy(_e)
       end
       _e.wav.x-=0.1
       if _e.wav.swarm.name=="circle" then
@@ -301,13 +341,13 @@ function update_enemies()
         _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
       end
     elseif _e.wav.path=="wave" then
-      if (_e.x+_e.w<0) del(enemies,_e)
+      if (_e.x+_e.w<0) delete_enemy(_e)
       _e.wav.x-=0.05
       local _wave_y=_e.wav.y+(sin(_e.wav.x/12)*10)
       _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
       _e.y=_wave_y+_e.wav.swarm[_e.si][2]
     elseif _e.wav.path=="slope" then
-      if (_e.x+_e.w<0) del(enemies,_e)
+      if (_e.x+_e.w<0) delete_enemy(_e)
       if _e.wav.x<97 and _e.wav.x>30 and _e.wav.y<87 then
         _e.wav.y+=0.08
       end
@@ -315,7 +355,7 @@ function update_enemies()
       _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
       _e.y=_e.wav.y+_e.wav.swarm[_e.si][2]
     elseif _e.wav.path=="circle" then
-      if (_e.y>127) del(enemies,_e)
+      if (_e.y>127) delete_enemy(_e)
       _e.a+=0.003
       if (_e.a > 1) _e.a=0
       _e.wav.x=_e.ox+_e.r*cos(_e.a)
@@ -418,8 +458,12 @@ function update_game()
   update_map()
   update_cape()
   update_waves()
-
   update_enemies()
+
+  if #enemy_waves==0 and #enemies==0 then
+    _update60=update_lvlend
+    _draw=draw_lvlend
+  end
 
   move_ascii()
 
@@ -429,7 +473,6 @@ function update_game()
 
   check_shots()
 end
-
 
 function draw_shots()
   for i=1,#ascii.shots do
@@ -515,10 +558,26 @@ function draw_game()
   foreach(enemies,draw_enemy)
   draw_shots()
   draw_infobar()
+end
+-->8
+--game over
+function update_lvlend()
+  update_clouds()
+  update_cape()
+  if (ascii.x < 128) ascii.x+=1
+end
 
-  --if #clouds>0 then
-  --print(#clouds,5,12,8)
-  --end
+function draw_lvlend()
+  cls()
+  rectfill(0,0,127,127,1)
+  foreach(clouds,draw_cloud)
+  draw_map()
+  draw_infobar()
+  draw_ascii()
+  print_center("level 1 finished", 49, 0)
+  print_center("level 1 finished", 50, 7)
+  print_center("press x to continue", 59, 0)
+  print_center("press x to continue", 60, 7)
 end
 -->8
 --game over
@@ -529,13 +588,6 @@ function update_gover()
   ascii.x=60
   ascii.y=100
   ascii.ghost_y-=0.6
-
-  -- if tim.game.f<30 then
-  -- 	ascii.ghost_x-=0.2
-  -- else
-  -- 	ascii.ghost_x+=0.2
-  -- end
-
   ascii.ghost_x=ascii.x+(sin(ascii.ghost_y/12)*10)
 
   if btn(5) then
@@ -567,7 +619,7 @@ __gfx__
 00000000000007075000057000070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000dd0007775555557777770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00700700a8888b7b5855857477470000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000988777440555500777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000988777770555500777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00077000077777700055000077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00700700070000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000700007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
