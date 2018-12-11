@@ -36,17 +36,7 @@ function _update60()
 	end
 		
 	if (y>54 and y<64) addsplashes()
-	
 	updatesplashes()
-	
-	if btn(❎)
-	 or btn(🅾️)
-	 or btn(⬅️)
-	 or btn(➡️)
-	 or btn(⬆️)
-	 or btn(⬇️) then
-	 load("intro")
-	end
 end
 
 function updatesplashes()
@@ -93,20 +83,22 @@ end
 function _draw()
 	cls()
 	map(0,0,0,0,16,16)
-	print("das war episode #14",txt_x,y-97,6)
+	print("das war episode #15",txt_x,y-97,6)
 	print("vielen dank fuers zusehen",txt_x,y-87,6)
 	print("bis zum naechsten mal",txt_x,y-77,6)
 	spr(0,mx,y,1,2)
 	spr(32,kx,y,1,2)
-	print("wir danken:",txt_x,y+20,6)
-	print("gerlinde hinterleitner",txt_x,y+30,6)	
-	print("daniel koller",txt_x,y+37,6)	
-	print("lisa stadler",txt_x,y+44,6)	
-	print("und der tollen community",txt_x,y+61,6)	
-	print("auf derstandard.at",txt_x,y+68,6)	
-	print("episode #15 am 11.12.- 19:00",txt_x,y+95,10)
-	print("twitter:",txt_x,y+115,7)
-	print("@freddychops, @zothynine",txt_x,y+125,7)
+	--print("wir danken:",txt_x,y+20,6)
+	--print("gerlinde hinterleitner",txt_x,y+30,6)	
+	--print("daniel koller",txt_x,y+37,6)	
+	--print("lisa stadler",txt_x,y+44,6)	
+	print("wir danken",txt_x,y+25,6)	
+	print("der tollen community",txt_x,y+35,6)	
+	print("auf derstandard.at",txt_x,y+45,6)	
+	print("episode #16 am 18.12.- 19:00",txt_x,y+55,7)
+	print("auf dst.at/picoheads",txt_x,y+65,7)
+	print("twitter:",txt_x,y+90,7)
+	print("@freddychops, @zothynine",txt_x,y+100,7)
 	for row=0,16 do
 		for colm=0,8 do
 			if not pixel_under_water(colm,row) then
