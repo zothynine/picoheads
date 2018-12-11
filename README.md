@@ -1,12 +1,6 @@
 #   Pico Heads Shownotes
 
-##  Episode #1
-
-    - Episodentitel: Der Beginn
-    - Game Genre: Sidescroller Shot 'em up
-    - Game Name: Catfight
-
-### Technical Details
+## Technical Details
 
     - Cart Filename catfight.p8
     - Git Repo: https://bitbucket.org/zothynine/picoheads.git
