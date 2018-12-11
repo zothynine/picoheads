@@ -54,7 +54,7 @@ function _init()
 
   shots={}
 
-  enemies={
+  enemies_def={
     rat={16,0,6,5},
     mouse={22,0,6,5}
   }
@@ -71,28 +71,31 @@ function _init()
     {
       {tim="0:3:0",
         swarm=swarms.circle,
-        enemy=enemies.mouse,
+        enemy=enemies_def.mouse,
         path="linear",
         x=128,
         y=50,
         shots={iv=0},
-        count=swarms.circle.n},
+        count=swarms.circle.n,
+        dirty=false},
       {tim="0:6:0",
         swarm=swarms.tri_l,
-        enemy=enemies.rat,
+        enemy=enemies_def.rat,
         path="wave",
         x=128,
         y=50,
         shots={iv=0},
-        count=#swarms.tri_l},
+        count=#swarms.tri_l,
+        dirty=false},
       {tim="0:9:0",
         swarm=swarms.tri_s,
-        enemy=enemies.mouse,
+        enemy=enemies_def.mouse,
         path="circle",
         x=128,
         y=40,
         shots={iv=0},
-        count=#swarms.tri_s}
+        count=#swarms.tri_s,
+        dirty=false}
     }
   }
 
@@ -128,7 +131,29 @@ function update_game_timer()
   tim.game.str=tim.game.m..":"..tim.game.s..":"..tim.game.f
 end
 
+function set_lvl(lvl)
+  local _w={}
+  local _l=levels[lvl]
+  for i=1,#_l do
+    add(_w, _l[i])
+  end
+  return _w
+end
+
 function setuplvl()
+  tim.game={
+    m=0,
+    s=0,
+    f=0,
+    str="0:0:0"
+  }
+  enemy_waves=set_lvl(1)
+  enemies={}
+  shots={}
+  ascii.x=56
+  ascii.y=55
+  ascii.collided=false
+  tim.lvlstart=lvltim
 end
 
 function _update60()
@@ -167,10 +192,9 @@ function update_lvlstart()
   update_cape()
   tim.lvlstart -= 1
   if tim.lvlstart < 1 then
+    setuplvl()
     _update60=update_game
     _draw=draw_game
-    enemy_waves=levels[1]
-    tim.lvlstart=lvltim
   end
 end
 
@@ -323,6 +347,8 @@ end
 function update_enemies()
   for i=#enemies,1,-1 do
     local _e=enemies[i]
+    local _dirty = _e.wav.dirty
+    
     if _e.wav.path=="linear" then
       if _e.x+_e.w<0 then
         delete_enemy(_e)
@@ -565,6 +591,11 @@ function update_lvlend()
   update_clouds()
   update_cape()
   if (ascii.x < 128) ascii.x+=1
+  
+  if btn(5) then
+    _update60=update_lvlstart
+    _draw=draw_lvlstart
+  end
 end
 
 function draw_lvlend()
@@ -592,8 +623,8 @@ function update_gover()
 
   if btn(5) then
     _init()
-    _update60=update_game
-    _draw=draw_game
+    _update60=update_lvlstart
+    _draw=draw_lvlstart
   end
 end
 
