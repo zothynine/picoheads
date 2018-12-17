@@ -54,7 +54,7 @@ function _init()
 
   shots={}
 
-  enemies_def={
+  enemy_types={
     rat={16,0,6,5},
     mouse={22,0,6,5}
   }
@@ -71,37 +71,38 @@ function _init()
     {
       {tim="0:3:0",
         swarm=swarms.circle,
-        enemy=enemies_def.mouse,
+        e_type=enemy_types.mouse,
         path="linear",
         x=128,
         y=50,
         shots={iv=0},
         count=swarms.circle.n,
-        dirty=false},
+        dirty=false,
+        enemies={}},
       {tim="0:6:0",
         swarm=swarms.tri_l,
-        enemy=enemies_def.rat,
+        e_type=enemy_types.rat,
         path="wave",
         x=128,
         y=50,
         shots={iv=0},
         count=#swarms.tri_l,
-        dirty=false},
+        dirty=false,
+        enemies={}},
       {tim="0:9:0",
         swarm=swarms.tri_s,
-        enemy=enemies_def.mouse,
+        e_type=enemy_types.mouse,
         path="circle",
         x=128,
         y=40,
         shots={iv=0},
         count=#swarms.tri_s,
-        dirty=false}
+        dirty=false,
+        enemies={}}
     }
   }
 
   enemy_waves={}
-
-  enemies={}
 
   _update60=update_start
   _draw=draw_start
@@ -148,7 +149,6 @@ function setuplvl()
     str="0:0:0"
   }
   enemy_waves=set_lvl(1)
-  enemies={}
   shots={}
   ascii.x=56
   ascii.y=55
@@ -258,13 +258,17 @@ function check_shots()
     -- delete shot when out of bounds
     if (_x>127) del(ascii.shots,_shot)
 
-    for i=#enemies,1,-1 do
-      local _e=enemies[i]
-      if collision(_shot,_e) then
-        delete_enemy(_e)
-        del(ascii.shots,_shot)
-        sfx(1)
-        score+=1
+    for i=#enemy_waves,1,-1 do
+      local _w=enemy_waves[i]
+
+      for j=#_w.enemies,1,-1 do
+        local _e=_w.enemies[j]
+        if collision(_shot,_e) then
+          delete_enemy(_w,_e)
+          del(ascii.shots,_shot)
+          sfx(1)
+          score+=1
+        end
       end
     end
   end
@@ -302,113 +306,120 @@ function create_wave(_w)
       _y=_w.y+_w.swarm[i][2]
     end
 
-    if _w.path=="linear" or
-      _w.path=="wave" or
-      _w.path=="slope" then
-      create_enemy(_w,i,_x,_y,nil,nil,_a)
-    elseif _w.path=="circle" then
-      create_enemy(_w,i,_x,_y,127,127,0.25-0.003)
+    if _w.path=="circle" then
+      add(_w.enemies, {
+        si=i,
+        x=_x,
+        y=_y,
+        ox=127,
+        oy=127,
+        a=0.25-0.003,
+        w=6,
+        h=5,
+        r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y))})
+    else
+      add(_w.enemies, {
+        si=i,
+        x=_x,
+        y=_y,
+        ox=nil,
+        oy=nil,
+        a=_a,
+        w=6,
+        h=5,
+        r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y))})
     end
   end
-end
-
-function create_enemy(_w,_si,_x,_y,_originx,_originy,_a)
-  add(enemies,
-    {
-      x=_x,
-      y=_y,
-      w=6,
-      h=5,
-      r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y)), --circle radius
-      ox=_originx, --circle center x
-      oy=_originy, --circle center y
-      a=_a, --initial angle
-      wav=_w,
-      si=_si
-    }
-  )
 end
 
 function update_waves()
-  local _f=enemy_waves[1]
-  if (#enemy_waves==0) return
-  if _f.tim==tim.game.str then
-    create_wave(_f)
-    del(enemy_waves,_f)
+  for i=1,#enemy_waves do
+    local _w=enemy_waves[i]
+    if _w.tim==tim.game.str then
+      if not _w.created then
+        create_wave(_w)
+        _w.created=true
+      end
+    end
   end
 end
 
-function delete_enemy(_e)
-  _e.wav.count-=1
-  del(enemies,_e)
-  if (_e.wav.count==0) del(enemy_waves, _e.wav)
+function delete_enemy(_w,_e)
+  del(_w.enemies,_e)
+  if (#_w.enemies==0) del(enemy_waves, _w)
 end
 
 function update_enemies()
-  for i=#enemies,1,-1 do
-    local _e=enemies[i]
-    local _dirty = _e.wav.dirty
-    
-    if _e.wav.path=="linear" then
-      if _e.x+_e.w<0 then
-        delete_enemy(_e)
-      end
-      _e.wav.x-=0.1
-      if _e.wav.swarm.name=="circle" then
-        _e.x=_e.wav.x+_e.wav.swarm.r*cos(_e.a)
-        _e.y=_e.wav.y+_e.wav.swarm.r*sin(_e.a)
-        if _e.wav.x<=70 then
-          _e.wav.x+=0.1
-          _e.a+=0.01
-          _e.x=_e.wav.x+_e.wav.swarm.r*cos(_e.a)
-          _e.y=_e.wav.y+_e.wav.swarm.r*sin(_e.a)
+  for i=1,#enemy_waves do
+    local _w=enemy_waves[i]
+    local _dirty = _w.dirty
+    for j=#_w.enemies,1,-1 do
+      if (j==#_w.enemies-1) _dirty=true
+      local _e=_w.enemies[j]
+
+      if _w.path=="linear" and _w.swarm.name=="circle" then
+        if _e.x+_e.w<0 then
+          delete_enemy(_w,_e)
         end
-      else
-        _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
+        if (not _dirty and _w.x>70) _w.x-=0.1
+        _e.x=_w.x+_w.swarm.r*cos(_e.a)
+        _e.y=_w.y+_w.swarm.r*sin(_e.a)
+        if _w.x<=70 then
+          _e.a+=0.01
+          _e.x=_w.x+_w.swarm.r*cos(_e.a)
+          _e.y=_w.y+_w.swarm.r*sin(_e.a)
+        end
+      elseif _w.path=="linear" then
+        if _e.x+_e.w<0 then
+          delete_enemy(_w,_e)
+        end
+        if (not _dirty) _w.x-=0.1
+        _e.x=_w.x+_w.swarm[_e.si][1]
+      elseif _w.path=="wave" then
+        if (_e.x+_e.w<0) delete_enemy(_w,_e)
+        if (not _dirty) _w.x-=0.05
+        local _wave_y=_w.y+(sin(_w.x/12)*10)
+        _e.x=_w.x+_w.swarm[_e.si][1]
+        _e.y=_wave_y+_w.swarm[_e.si][2]
+      elseif _w.path=="slope" then
+        if (_e.x+_e.w<0) delete_enemy(_w,_e)
+        if _w.x<97 and _w.x>30 and _w.y<87 then
+          if (not _dirty) _w.y+=0.08
+        end
+        if (not _dirty) _w.x-=0.05
+        _e.x=_w.x+_w.swarm[_e.si][1]
+        _e.y=_w.y+_w.swarm[_e.si][2]
+      elseif _w.path=="circle" then
+        if (_e.y>127) delete_enemy(_w,_e)
+        _e.a+=0.003
+        if (_e.a > 1) _e.a=0
+        if (not _dirty) _w.x=_e.ox+_e.r*cos(_e.a)
+        if (not _dirty) _w.y=_e.oy+_e.r*sin(_e.a)
+        _e.x=_w.x+_w.swarm[_e.si][1]
+        _e.y=_w.y+_w.swarm[_e.si][2]
       end
-    elseif _e.wav.path=="wave" then
-      if (_e.x+_e.w<0) delete_enemy(_e)
-      _e.wav.x-=0.05
-      local _wave_y=_e.wav.y+(sin(_e.wav.x/12)*10)
-      _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
-      _e.y=_wave_y+_e.wav.swarm[_e.si][2]
-    elseif _e.wav.path=="slope" then
-      if (_e.x+_e.w<0) delete_enemy(_e)
-      if _e.wav.x<97 and _e.wav.x>30 and _e.wav.y<87 then
-        _e.wav.y+=0.08
-      end
-      _e.wav.x-=0.05
-      _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
-      _e.y=_e.wav.y+_e.wav.swarm[_e.si][2]
-    elseif _e.wav.path=="circle" then
-      if (_e.y>127) delete_enemy(_e)
-      _e.a+=0.003
-      if (_e.a > 1) _e.a=0
-      _e.wav.x=_e.ox+_e.r*cos(_e.a)
-      _e.wav.y=_e.oy+_e.r*sin(_e.a)
-      _e.x=_e.wav.x+_e.wav.swarm[_e.si][1]
-      _e.y=_e.wav.y+_e.wav.swarm[_e.si][2]
-    end
 
-    if _e.wav.shots then
-      if _e.wav.shots.iv==tim.game.f
-      and _e.x < 128-_e.w then
-        add(shots,{x=_e.x,y=_e.y+3,w=3,h=1})
+      if _w.shots then
+        if _w.shots.iv==tim.game.f
+        and _e.x < 128-_e.w then
+          add(shots,{x=_e.x,y=_e.y+3,w=3,h=1})
+        end
+      end
+
+      if collision(_e,ascii) then
+        ascii_hit()
+      end
+
+      if ascii.collided then
+        ascii.cdtim-=1
+
+        if ascii.cdtim==0 then
+          ascii.collided=false
+          ascii.cdtim=ascii.cooldwn
+        end
       end
     end
-
-    if collision(_e,ascii) then
-      ascii_hit()
-    end
-
-    if ascii.collided then
-      ascii.cdtim-=1
-
-      if ascii.cdtim==0 then
-        ascii.collided=false
-        ascii.cdtim=ascii.cooldwn
-      end
-    end
+    _dirty=false
   end
 end
 
@@ -486,7 +497,7 @@ function update_game()
   update_waves()
   update_enemies()
 
-  if #enemy_waves==0 and #enemies==0 then
+  if #enemy_waves==0 then
     _update60=update_lvlend
     _draw=draw_lvlend
   end
@@ -520,8 +531,8 @@ function draw_cloud(cloud)
   sspr(o,8,9,6,cloud.x,cloud.y,9*cloud.scl,5*cloud.scl)
 end
 
-function draw_enemy(_e)
-  local _s=_e.wav.enemy
+function draw_enemy(_w,_e)
+  local _s=_w.e_type
   sspr(_s[1],_s[2],_s[3],_s[4],_e.x,_e.y)
 end
 
@@ -581,7 +592,17 @@ function draw_game()
     draw_ascii()
   end
 
-  foreach(enemies,draw_enemy)
+  for i=1,#enemy_waves do
+    local _w=enemy_waves[i]
+    local _we=_w.enemies
+
+    if #_we>0 then
+      for j=1,#_we do
+        draw_enemy(_w,_we[j])
+      end
+    end
+  end
+
   draw_shots()
   draw_infobar()
 end
@@ -591,7 +612,7 @@ function update_lvlend()
   update_clouds()
   update_cape()
   if (ascii.x < 128) ascii.x+=1
-  
+
   if btn(5) then
     _update60=update_lvlstart
     _draw=draw_lvlstart
