@@ -13,7 +13,7 @@ function _init()
 		txt1="wir entwickeln",
 		txt2="presented by picoheads",
 		txt3="episode #16:",
-		txt4="merry bitmas",
+		txt4="merry bitmess",
 		x=6,
 		ln1_y=15,
 		ln2_y=26,
