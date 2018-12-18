@@ -47,6 +47,8 @@ function _init()
 		glitches=80
 	}
 	
+	snow={}
+	
 	music(0)
 end
 
@@ -56,6 +58,19 @@ end
 
 function _update60()
 	⧗.cur-=1
+	
+	if #snow<60 then
+		local _col=7
+		if (rnd(2)>1) _col=6
+		add(snow,{x=rnd(128),y=-1,s=0.1+rnd(1),c=_col})
+	end
+	
+	for s=#snow,1,-1 do
+		local _s=snow[s]
+		if (_s.y>128) del(snow,_s)
+		_s.y+=_s.s
+	end
+	
 	if (⧗.cur==0) ⧗.cur=cur.blink
 	
 	--cursor blinking
@@ -130,6 +145,12 @@ end
 function _draw()
 	cls()
 	rectfill(0,0,127,127,1)
+	
+	for s=1,#snow do
+		local _s=snow[s]
+		pset(_s.x,_s.y,_s.c)
+	end
+	
 	rectfill(cur.x,cur.y,cur.x+4,cur.y+5,cur.c)
 	print(text.ln1,text.x,text.ln1_y,6) --title
 	print(text.ln2,text.x,text.ln2_y,6) --tagline
