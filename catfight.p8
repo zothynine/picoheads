@@ -37,6 +37,7 @@ function _init()
     plxb2_x=128,
   }
 
+  -- DIE ASCII!
   ascii={
     x=56,
     y=55,
@@ -46,7 +47,7 @@ function _init()
     h=7,
     shots={},
     collided=false,
-    lives=2,
+    lives=8,
     cape={9,10,13},
     cooldwn=900,
     cdtim=900
@@ -62,6 +63,8 @@ function _init()
   swarms={
     line4={{0,0},{10,0},{20,0},{30,0}},
     line6={{0,0},{10,0},{20,0},{30,0},{40,0},{50,0}},
+    stack3={{0,0},{0,10},{0,-10}},
+    stack5={{0,0},{0,10},{0,20},{0,-10},{0,-20}},
     tri_s={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10}},
     tri_l={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10},{30,-15},{30,-5},{30,5},{30,15}},
     circle={name="circle",r=15,n=8,a=0.125}
@@ -70,33 +73,125 @@ function _init()
   levels={
     {
       {tim="0:3:0",
-        swarm=swarms.circle,
+        swarm=swarms.line4,
         e_type=enemy_types.mouse,
         path="linear",
-        x=128,
-        y=50,
-        shots={iv=0},
-        count=swarms.circle.n,
+        x=127,
+        y=25,
+        count=#swarms.line4,
         dirty=false,
         enemies={}},
       {tim="0:6:0",
-        swarm=swarms.tri_l,
-        e_type=enemy_types.rat,
-        path="wave",
-        x=128,
-        y=50,
-        shots={iv=0},
-        count=#swarms.tri_l,
+        swarm=swarms.line4,
+        e_type=enemy_types.mouse,
+        path="linear",
+        x=127,
+        y=100,
+        count=#swarms.line4,
         dirty=false,
         enemies={}},
       {tim="0:9:0",
+        swarm=swarms.line4,
+        e_type=enemy_types.mouse,
+        path="linear",
+        x=127,
+        y=40,
+        count=#swarms.line4,
+        dirty=false,
+        enemies={}},
+      {tim="0:9:0",
+        swarm=swarms.line4,
+        e_type=enemy_types.mouse,
+        path="linear",
+        x=127,
+        y=80,
+        count=#swarms.line4,
+        dirty=false,
+        enemies={}},
+      {tim="0:11:0",
+        swarm=swarms.tri_s,
+        e_type=enemy_types.mouse,
+        path="linear",
+        x=127,
+        y=60,
+        shots={iv=0},
+        count=#swarms.tri_s,
+        dirty=false,
+        enemies={}},
+      {tim="0:15:0",
+        swarm=swarms.circle,
+        e_type=enemy_types.rat,
+        path="linear",
+        x=128,
+        y=60,
+        count=swarms.circle.n,
+        dirty=false,
+        enemies={}},
+      {tim="0:15:0",
+        swarm=swarms.line6,
+        e_type=enemy_types.rat,
+        path="wave",
+        x=128,
+        y=30,
+        shots={iv=0},
+        count=#swarms.line6,
+        dirty=false,
+        enemies={}},
+      {tim="0:15:0",
+        swarm=swarms.line6,
+        e_type=enemy_types.rat,
+        path="wave",
+        x=128,
+        y=90,
+        shots={iv=0},
+        count=#swarms.line6,
+        dirty=false,
+        enemies={}},
+      {tim="0:30:0",
+        swarm=swarms.line6,
+        e_type=enemy_types.mouse,
+        path="slope",
+        x=128,
+        y=25,
+        shots={iv=0},
+        count=#swarms.line6,
+        dirty=false,
+        enemies={}},
+      {tim="0:36:0",
         swarm=swarms.tri_s,
         e_type=enemy_types.mouse,
         path="circle",
         x=128,
         y=40,
-        shots={iv=0},
         count=#swarms.tri_s,
+        dirty=false,
+        enemies={}},
+      {tim="0:42:0",
+        swarm=swarms.stack3,
+        e_type=enemy_types.mouse,
+        path="linear",
+        x=128,
+        y=60,
+        count=#swarms.stack3,
+        dirty=false,
+        enemies={}},
+      {tim="0:42:30",
+        swarm=swarms.stack5,
+        e_type=enemy_types.rat,
+        path="linear",
+        x=128,
+        y=60,
+        count=#swarms.stack5,
+        dirty=false,
+        enemies={}},
+      {tim="0:45:0",
+        swarm=swarms.circle,
+        e_type=enemy_types.rat,
+        path="linear",
+        x=128,
+        y=60,
+        shots={iv=0},
+        count=swarms.circle.n,
         dirty=false,
         enemies={}}
     }
@@ -230,7 +325,7 @@ function move_ascii()
     ascii.x=mid(0,ascii.x+1,120)
   elseif btn(2) then
     --oben ⬆️
-    ascii.y=mid(0,ascii.y-1,127)
+    ascii.y=mid(ui_h+1,ascii.y-1,127)
   elseif btn(3) then
     --unten ⬇️
     ascii.y=mid(0,ascii.y+1,121)
@@ -350,7 +445,7 @@ function delete_enemy(_w,_e)
 end
 
 function update_enemies()
-  for i=1,#enemy_waves do
+  for i=#enemy_waves,1,-1 do
     local _w=enemy_waves[i]
     local _dirty = _w.dirty
     for j=#_w.enemies,1,-1 do
@@ -361,7 +456,7 @@ function update_enemies()
         if _e.x+_e.w<0 then
           delete_enemy(_w,_e)
         end
-        if (not _dirty and _w.x>70) _w.x-=0.1
+        if (not _dirty and _w.x>70) _w.x-=0.5
         _e.x=_w.x+_w.swarm.r*cos(_e.a)
         _e.y=_w.y+_w.swarm.r*sin(_e.a)
         if _w.x<=70 then
@@ -373,20 +468,20 @@ function update_enemies()
         if _e.x+_e.w<0 then
           delete_enemy(_w,_e)
         end
-        if (not _dirty) _w.x-=0.1
+        if (not _dirty) _w.x-=0.5
         _e.x=_w.x+_w.swarm[_e.si][1]
       elseif _w.path=="wave" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
-        if (not _dirty) _w.x-=0.05
+        if (not _dirty) _w.x-=0.5
         local _wave_y=_w.y+(sin(_w.x/12)*10)
         _e.x=_w.x+_w.swarm[_e.si][1]
         _e.y=_wave_y+_w.swarm[_e.si][2]
       elseif _w.path=="slope" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
         if _w.x<97 and _w.x>30 and _w.y<87 then
-          if (not _dirty) _w.y+=0.08
+          if (not _dirty) _w.y+=0.4
         end
-        if (not _dirty) _w.x-=0.05
+        if (not _dirty) _w.x-=0.5
         _e.x=_w.x+_w.swarm[_e.si][1]
         _e.y=_w.y+_w.swarm[_e.si][2]
       elseif _w.path=="circle" then
@@ -456,7 +551,7 @@ function update_clouds()
   for i=#clouds,1,-1 do
     local _cloud=clouds[i]
     _cloud.x-=_cloud.dx
-    if (_cloud.x < -8) del(clouds,_cloud)
+    if (_cloud.x < (-8*_cloud.scl)) del(clouds,_cloud)
   end
 
   tim.next_cloud-=1
