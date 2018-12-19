@@ -37,7 +37,7 @@ function _init()
     plxb2_x=128,
   }
 
-  -- DIE ASCII!
+  -- die ascii
   ascii={
     x=56,
     y=55,
