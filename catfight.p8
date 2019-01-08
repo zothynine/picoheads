@@ -37,6 +37,12 @@ function _init()
     plxb2_x=128,
   }
 
+  powerups_defs={
+    {type="dbllaser",sx=28,sy=0,w=6,h=6},
+  }
+
+  powerups={}
+
   -- die ascii
   ascii={
     x=56,
@@ -49,6 +55,7 @@ function _init()
     collided=false,
     lives=8,
     cape={9,10,13},
+    pwrups={},
     cooldwn=900,
     cdtim=900
   }
@@ -227,13 +234,19 @@ function update_game_timer()
   tim.game.str=tim.game.m..":"..tim.game.s..":"..tim.game.f
 end
 
-function set_lvl(lvl)
-  local _w={}
-  local _l=levels[lvl]
-  for i=1,#_l do
-    add(_w, _l[i])
+function shallowcopy(_orig, _kv)
+  local _copy={}
+  if _kv then
+    for k,v in pairs(_orig) do
+      _copy[k]=v
+    end
+  else  
+    for i=1,#_orig do
+      add(_copy,_orig[i])
+    end
   end
-  return _w
+
+  return _copy
 end
 
 function setuplvl()
@@ -243,7 +256,7 @@ function setuplvl()
     f=0,
     str="0:0:0"
   }
-  enemy_waves=set_lvl(1)
+  enemy_waves=shallowcopy(levels[1])
   shots={}
   ascii.x=56
   ascii.y=55
@@ -333,14 +346,43 @@ function move_ascii()
 end
 
 function shoot()
-  add(ascii.shots,{
-    x=ascii.x+6,
-    y=ascii.y+2,
-    w=3,
-    h=1,
-    spd=2
-  })
+  if #ascii.pwrups>0
+      and ascii.pwrups[1].type=="dbllaser" then
+    add(ascii.shots,{
+      x=ascii.x+6,
+      y=ascii.y+1,
+      w=3,
+      h=1,
+      spd=2
+    })
+    add(ascii.shots,{
+      x=ascii.x+6,
+      y=ascii.y+3,
+      w=3,
+      h=1,
+      spd=2
+    })
+  else
+    add(ascii.shots,{
+      x=ascii.x+6,
+      y=ascii.y+2,
+      w=3,
+      h=1,
+      spd=2
+    })
+  end
   sfx(0)
+end
+
+function spawn_pwrup(_x, _y)
+  local _chance=rnd(101) < 90
+  local _p=shallowcopy(powerups_defs[1],true)
+  powerupdebug=powerups_defs[1]
+  _p.x=_x
+  _p.y=_y
+  if _chance then
+    add(powerups, _p)
+  end
 end
 
 function check_shots()
@@ -359,6 +401,7 @@ function check_shots()
       for j=#_w.enemies,1,-1 do
         local _e=_w.enemies[j]
         if collision(_shot,_e) then
+          spawn_pwrup(_e.x, _e.y)
           delete_enemy(_w,_e)
           del(ascii.shots,_shot)
           sfx(1)
@@ -584,6 +627,17 @@ function update_cape()
   end
 end
 
+function update_pwrups()
+  for i=#powerups,1,-1 do
+    local _p=powerups[i]
+    if collision(ascii,_p) then
+      iscollided=true
+      add(ascii.pwrups,_p)
+      del(powerups,_p)
+    end
+  end
+end
+
 function update_game()
   update_game_timer()
   update_clouds()
@@ -591,6 +645,7 @@ function update_game()
   update_cape()
   update_waves()
   update_enemies()
+  update_pwrups()
 
   if #enemy_waves==0 then
     _update60=update_lvlend
@@ -673,6 +728,10 @@ function draw_map()
   map(0,15,maps.gnd2_x,120,16,1)
 end
 
+function draw_pwrups(_p)
+  sspr(28,0,_p.w,_p.h,_p.x,_p.y)
+end
+
 function draw_game()
   cls()
   rectfill(0,0,127,127,1)
@@ -700,6 +759,10 @@ function draw_game()
 
   draw_shots()
   draw_infobar()
+  foreach(powerups, draw_pwrups)
+  if powerupdebug then
+    print(powerups[1].type,20,5,8)
+  end
 end
 -->8
 --game over
@@ -763,12 +826,12 @@ function draw_gover()
   end
 end
 __gfx__
-00000000000007075000057000070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000dd0007775555557777770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700a8888b7b5855857477470000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000988777770555500777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000077777700055000077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700070000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000007075000057000070033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000dd00077755555577777703bb300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700a8888b7b5855857477473bbbb30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000988777770555500777703bbbb30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000770000777777000550000770003bb300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700070000700000000000000033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000700007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00677770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
