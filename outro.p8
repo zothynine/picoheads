@@ -95,11 +95,13 @@ function _draw()
 	print("wir danken",txt_x,y+25,6)	
 	print("der tollen community",txt_x,y+35,6)	
 	print("auf derstandard.at",txt_x,y+45,6)	
-	print("episode #18 am 15.1. - 19:00",txt_x,y+55,7)
+	print("episode #19 am 15.1. - 19:00",txt_x,y+55,7)
 	print("auf dst.at/picoheads",txt_x,y+65,7)
 	print("twitter:",txt_x,y+90,7)
 	print("@freddychops, @zothynine",txt_x,y+100,7)
-	print("picoheads.at (in arbeit)",txt_x,y+110,7)
+	print("klemens@picoheads.at",txt_x,y+110,7)
+	print("mario@picoheads.at",txt_x,y+120,7)
+	print("picoheads.at (in arbeit)",txt_x,y+130,7)
 	for row=0,16 do
 		for colm=0,8 do
 			if not pixel_under_water(colm,row) then
