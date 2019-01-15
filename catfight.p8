@@ -38,7 +38,8 @@ function _init()
   }
 
   powerups_defs={
-    {type="dbllaser",sx=28,sy=0,w=6,h=6},
+    {cat="shot", type="dbllaser",sx=28,sy=0,w=6,h=6},
+    {cat="shield", type="common",sx=34,sy=0,w=6,h=6,r=8,lt=3}
   }
 
   powerups={}
@@ -57,7 +58,8 @@ function _init()
     cape={9,10,13},
     pwrups={},
     cooldwn=900,
-    cdtim=900
+    cdtim=900,
+    hitbox={}
   }
 
   shots={}
@@ -330,6 +332,13 @@ function collision(_a,_b)
 end
 
 function move_ascii()
+  ascii.hitbox={
+    x=ascii.x,
+    y=ascii.y,
+    w=ascii.w,
+    h=ascii.h
+  }
+
   if btn(0) then
     --links ⬅️
     ascii.x=mid(0,ascii.x-1,127)
@@ -345,9 +354,15 @@ function move_ascii()
   end
 end
 
+function get_powerup(_cat)
+  for i=1,#ascii.pwrups do
+    if (ascii.pwrups[i].cat==_cat) return ascii.pwrups[i]
+  end
+end
+
 function shoot()
-  if #ascii.pwrups>0
-      and ascii.pwrups[1].type=="dbllaser" then
+  local _p = get_powerup("shot")
+  if _p and _p.type=="dbllaser" then
     add(ascii.shots,{
       x=ascii.x+6,
       y=ascii.y+1,
@@ -375,9 +390,10 @@ function shoot()
 end
 
 function spawn_pwrup(_x, _y)
-  local _chance=rnd(101) < 90
-  local _p=shallowcopy(powerups_defs[1],true)
-  powerupdebug=powerups_defs[1]
+  local _chance=rnd(101) < 100
+  local _i=ceil(rnd(#powerups_defs))
+  local _p=shallowcopy(powerups_defs[_i],true)
+  powerupdebug=powerups_defs[_i]
   _p.x=_x
   _p.y=_y
   if _chance then
@@ -420,7 +436,7 @@ function check_shots()
     -- delete shot when out of bounds
     if (_x+_shot.w<0) del(shots,_shot)
 
-    if collision(_shot,ascii) then
+    if collision(_shot,ascii.hitbox) then
       ascii_hit()
       del(shots,_shot)
       sfx(1)
@@ -544,7 +560,7 @@ function update_enemies()
         end
       end
 
-      if collision(_e,ascii) then
+      if collision(_e,ascii.hitbox) then
         ascii_hit()
       end
 
@@ -562,7 +578,12 @@ function update_enemies()
 end
 
 function ascii_hit()
-  if not ascii.collided then
+  local _shield=get_powerup("shield")
+  if _shield and not ascii.collided then
+    _shield.lt-=1
+    ascii.collided=true
+    if (_shield.lt==0) del(ascii.pwrups,_shield)
+  elseif not ascii.collided then
     ascii.lives-=1
     ascii.collided=true
   end
@@ -632,6 +653,9 @@ function update_pwrups()
     local _p=powerups[i]
     if collision(ascii,_p) then
       iscollided=true
+      for i=#ascii.pwrups,1,-1 do
+        if (ascii.pwrups[i].cat==_p.cat) del(ascii.pwrups,ascii.pwrups[i])
+      end
       add(ascii.pwrups,_p)
       del(powerups,_p)
     end
@@ -714,6 +738,18 @@ function draw_ascii(_scale,_ghost)
   end
   pal()
   palt()
+
+  --powerups
+  local _shield=get_powerup("shield")
+  if _shield then
+    ascii.hitbox={
+      x=ascii.x+(ascii.w/2)-_shield.r,
+      y=ascii.y+(ascii.h/2)-_shield.r,
+      w=_shield.r*2,
+      h=_shield.r*2
+    }
+    circ(ascii.x+(ascii.w/2),ascii.y+(ascii.h/2),_shield.r,7)
+  end
 end
 
 function draw_map()
@@ -729,7 +765,7 @@ function draw_map()
 end
 
 function draw_pwrups(_p)
-  sspr(28,0,_p.w,_p.h,_p.x,_p.y)
+  sspr(_p.sx,_p.sy,_p.w,_p.h,_p.x,_p.y)
 end
 
 function draw_game()
@@ -760,9 +796,6 @@ function draw_game()
   draw_shots()
   draw_infobar()
   foreach(powerups, draw_pwrups)
-  if powerupdebug then
-    print(powerups[1].type,20,5,8)
-  end
 end
 -->8
 --game over
@@ -826,12 +859,12 @@ function draw_gover()
   end
 end
 __gfx__
-00000000000007075000057000070033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000dd00077755555577777703bb300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700a8888b7b5855857477473bbbb30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000988777770555500777703bbbb30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000770000777777000550000770003bb300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700070000700000000000000033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000007075000057000070022000066000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000dd0007775555557777770288200677600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700a8888b7b5855857477472888826777760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000988777770555500777702888826777760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000077777700055000077000288200677600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700070000700000000000000022000066000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000700007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00677770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
