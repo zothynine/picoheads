@@ -66,8 +66,9 @@ function _init()
   shots={}
 
   enemy_types={
-    rat={16,0,6,5},
-    mouse={22,0,6,5}
+    mouse={s={22,0,6,5}},
+    rat={s={16,0,6,5},shots={iv=2}},
+    flea={s={46,0,9,9},shots={iv=1}},
   }
 
   swarms={
@@ -84,25 +85,27 @@ function _init()
     {
       {tim="0:3:0",
         swarm=swarms.line4,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.mouse.s,
         path="linear",
         x=127,
         y=25,
         count=#swarms.line4,
         dirty=false,
+        health=2,
         enemies={}},
       {tim="0:6:0",
         swarm=swarms.line4,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.flea.s,
         path="linear",
         x=127,
-        y=100,
+        y=90,
         count=#swarms.line4,
         dirty=false,
+        shots=enemy_types.flea.shots,
         enemies={}},
       {tim="0:9:0",
         swarm=swarms.line4,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.mouse.s,
         path="linear",
         x=127,
         y=40,
@@ -111,7 +114,7 @@ function _init()
         enemies={}},
       {tim="0:9:0",
         swarm=swarms.line4,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.mouse.s,
         path="linear",
         x=127,
         y=80,
@@ -120,56 +123,55 @@ function _init()
         enemies={}},
       {tim="0:11:0",
         swarm=swarms.tri_s,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.mouse.s,
         path="linear",
         x=127,
         y=60,
-        shots={iv=0},
         count=#swarms.tri_s,
         dirty=false,
         enemies={}},
       {tim="0:15:0",
         swarm=swarms.circle,
-        e_type=enemy_types.rat,
+        e_type=enemy_types.rat.s,
         path="linear",
         x=128,
         y=60,
+        shots=enemy_types.rat.shots,
         count=swarms.circle.n,
         dirty=false,
         enemies={}},
       {tim="0:15:0",
         swarm=swarms.line6,
-        e_type=enemy_types.rat,
+        e_type=enemy_types.rat.s,
         path="wave",
         x=128,
         y=30,
-        shots={iv=0},
+        shots=enemy_types.rat.shots,
         count=#swarms.line6,
         dirty=false,
         enemies={}},
       {tim="0:15:0",
         swarm=swarms.line6,
-        e_type=enemy_types.rat,
+        e_type=enemy_types.rat.s,
         path="wave",
         x=128,
         y=90,
-        shots={iv=0},
+        shots=enemy_types.rat.shots,
         count=#swarms.line6,
         dirty=false,
         enemies={}},
       {tim="0:30:0",
         swarm=swarms.line6,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.mouse.s,
         path="slope",
         x=128,
         y=25,
-        shots={iv=0},
         count=#swarms.line6,
         dirty=false,
         enemies={}},
       {tim="0:36:0",
         swarm=swarms.tri_s,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.mouse.s,
         path="circle",
         x=128,
         y=40,
@@ -178,7 +180,7 @@ function _init()
         enemies={}},
       {tim="0:42:0",
         swarm=swarms.stack3,
-        e_type=enemy_types.mouse,
+        e_type=enemy_types.mouse.s,
         path="linear",
         x=128,
         y=60,
@@ -187,20 +189,21 @@ function _init()
         enemies={}},
       {tim="0:42:30",
         swarm=swarms.stack5,
-        e_type=enemy_types.rat,
+        e_type=enemy_types.rat.s,
         path="linear",
         x=128,
         y=60,
+        shots=enemy_types.rat.shots,
         count=#swarms.stack5,
         dirty=false,
         enemies={}},
       {tim="0:45:0",
         swarm=swarms.circle,
-        e_type=enemy_types.rat,
+        e_type=enemy_types.rat.s,
         path="linear",
         x=128,
         y=60,
-        shots={iv=0},
+        shots=enemy_types.rat.shots,
         count=swarms.circle.n,
         dirty=false,
         enemies={}}
@@ -475,11 +478,15 @@ function update_shots()
       for j=#_w.enemies,1,-1 do
         local _e=_w.enemies[j]
         if collision(_shot,_e) then
-          spawn_pwrup(_e.x, _e.y)
-          delete_enemy(_w,_e)
+          if _e.health>1 then
+            _e.health-=1
+          else
+            spawn_pwrup(_e.x, _e.y)
+            delete_enemy(_w,_e)
+            sfx(1)
+            score+=1
+          end
           del(ascii.shots,_shot)
-          sfx(1)
-          score+=1
         end
       end
     end
@@ -528,6 +535,7 @@ function create_wave(_w)
         a=0.25-0.003,
         w=6,
         h=5,
+        health=_w.health or 1,
         r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y))})
     else
       add(_w.enemies, {
@@ -539,6 +547,7 @@ function create_wave(_w)
         a=_a,
         w=6,
         h=5,
+        health=_w.health or 1,
         r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y))})
     end
   end
@@ -612,8 +621,9 @@ function update_enemies()
       end
 
       if _w.shots then
-        if _w.shots.iv==tim.game.f
-        and _e.x < 128-_e.w then
+        if tim.game.s%_w.shots.iv==0
+          and tim.game.f==0
+          and _e.x < 128-_e.w then
           add(shots,{x=_e.x,y=_e.y+3,w=3,h=1})
         end
       end
@@ -640,7 +650,10 @@ function ascii_hit()
   if _shield and not ascii.collided then
     _shield.lt-=1
     ascii.collided=true
-    if (_shield.lt==0) del(ascii.pwrups,_shield)
+    if _shield.lt==0 then
+      ascii.has_shield=false
+      del(ascii.pwrups,_shield)
+    end
   elseif not ascii.collided then
     ascii.lives-=1
     ascii.collided=true
@@ -772,7 +785,6 @@ end
 function draw_infobar()
   rectfill(0,0,128,ui_h,2)
   sspr(13,0,3,4,2,2)
-  -- print("🐱:"..ascii.lives,2,2,7)
   print(ascii.lives,7,2,7)
   print_right(score,2,7,1)
 end
@@ -922,15 +934,15 @@ function draw_gover()
   end
 end
 __gfx__
-00000000000007075000057000070099000066000022000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000dd0007775555557777770988900677600288200000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700a8888b7b5855857477479888896777762888820000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000988777770555500777709888896777762888820000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000077777700055000077000988900677600288200000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700070000700000000000000099000066000022000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000700007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00677770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000007075000057000070099000066000022005000500050000000000000000000000000000000000000000000000000000000000000000000000000
+00000000dd0007775555557777770988900677600288200505550500000000000000000000000000000000000000000000000000000000000000000000000000
+00700700a8888b7b5855857477479888896777762888820057775000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000988777770555500777709888896777762888820577777500000000000000000000000000000000000000000000000000000000000000000000000000
+00077000077777700055000077000988900677600288205577777550000000000000000000000000000000000000000000000000000000000000000000000000
+00700700070000700000000000000099000066000022000577777500000000000000000000000000000000000000000000000000000000000000000000000000
+00000000700007000000000000000000000000000000000057775000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000505550500000000000000000000000000000000000000000000000000000000000000000000000000
+00677770000000000000000000000000000000000000005000500050000000000000000000000000000000000000000000000000000000000000000000000000
 06777777000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 67777777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 77777777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
