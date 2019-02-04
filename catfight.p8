@@ -85,7 +85,7 @@ function _init()
     {
       {tim="0:3:0",
         swarm=swarms.line4,
-        e_type=enemy_types.mouse.s,
+        e_type=enemy_types.mouse,
         path="linear",
         x=127,
         y=25,
@@ -95,17 +95,16 @@ function _init()
         enemies={}},
       {tim="0:6:0",
         swarm=swarms.line4,
-        e_type=enemy_types.flea.s,
+        e_type=enemy_types.flea,
         path="linear",
         x=127,
         y=90,
         count=#swarms.line4,
         dirty=false,
-        shots=enemy_types.flea.shots,
         enemies={}},
       {tim="0:9:0",
         swarm=swarms.line4,
-        e_type=enemy_types.mouse.s,
+        e_type=enemy_types.mouse,
         path="linear",
         x=127,
         y=40,
@@ -114,7 +113,7 @@ function _init()
         enemies={}},
       {tim="0:9:0",
         swarm=swarms.line4,
-        e_type=enemy_types.mouse.s,
+        e_type=enemy_types.mouse,
         path="linear",
         x=127,
         y=80,
@@ -123,7 +122,7 @@ function _init()
         enemies={}},
       {tim="0:11:0",
         swarm=swarms.tri_s,
-        e_type=enemy_types.mouse.s,
+        e_type=enemy_types.mouse,
         path="linear",
         x=127,
         y=60,
@@ -132,37 +131,34 @@ function _init()
         enemies={}},
       {tim="0:15:0",
         swarm=swarms.circle,
-        e_type=enemy_types.rat.s,
+        e_type=enemy_types.rat,
         path="linear",
         x=128,
         y=60,
-        shots=enemy_types.rat.shots,
         count=swarms.circle.n,
         dirty=false,
         enemies={}},
       {tim="0:15:0",
         swarm=swarms.line6,
-        e_type=enemy_types.rat.s,
+        e_type=enemy_types.rat,
         path="wave",
         x=128,
         y=30,
-        shots=enemy_types.rat.shots,
         count=#swarms.line6,
         dirty=false,
         enemies={}},
       {tim="0:15:0",
         swarm=swarms.line6,
-        e_type=enemy_types.rat.s,
+        e_type=enemy_types.rat,
         path="wave",
         x=128,
         y=90,
-        shots=enemy_types.rat.shots,
         count=#swarms.line6,
         dirty=false,
         enemies={}},
       {tim="0:30:0",
         swarm=swarms.line6,
-        e_type=enemy_types.mouse.s,
+        e_type=enemy_types.mouse,
         path="slope",
         x=128,
         y=25,
@@ -171,7 +167,7 @@ function _init()
         enemies={}},
       {tim="0:36:0",
         swarm=swarms.tri_s,
-        e_type=enemy_types.mouse.s,
+        e_type=enemy_types.mouse,
         path="circle",
         x=128,
         y=40,
@@ -180,7 +176,7 @@ function _init()
         enemies={}},
       {tim="0:42:0",
         swarm=swarms.stack3,
-        e_type=enemy_types.mouse.s,
+        e_type=enemy_types.mouse,
         path="linear",
         x=128,
         y=60,
@@ -189,21 +185,19 @@ function _init()
         enemies={}},
       {tim="0:42:30",
         swarm=swarms.stack5,
-        e_type=enemy_types.rat.s,
+        e_type=enemy_types.rat,
         path="linear",
         x=128,
         y=60,
-        shots=enemy_types.rat.shots,
         count=#swarms.stack5,
         dirty=false,
         enemies={}},
       {tim="0:45:0",
         swarm=swarms.circle,
-        e_type=enemy_types.rat.s,
+        e_type=enemy_types.rat,
         path="linear",
         x=128,
         y=60,
-        shots=enemy_types.rat.shots,
         count=swarms.circle.n,
         dirty=false,
         enemies={}}
@@ -246,7 +240,7 @@ function shallowcopy(_orig, _kv)
     for k,v in pairs(_orig) do
       _copy[k]=v
     end
-  else  
+  else
     for i=1,#_orig do
       add(_copy,_orig[i])
     end
@@ -620,8 +614,8 @@ function update_enemies()
         _e.y=_w.y+_w.swarm[_e.si][2]
       end
 
-      if _w.shots then
-        if tim.game.s%_w.shots.iv==0
+      if _w.e_type.shots then
+        if tim.game.s%_w.e_type.shots.iv==0
           and tim.game.f==0
           and _e.x < 128-_e.w then
           add(shots,{x=_e.x,y=_e.y+3,w=3,h=1})
@@ -778,7 +772,7 @@ function draw_cloud(cloud)
 end
 
 function draw_enemy(_w,_e)
-  local _s=_w.e_type
+  local _s=_w.e_type.s
   sspr(_s[1],_s[2],_s[3],_s[4],_e.x,_e.y)
 end
 
@@ -799,7 +793,7 @@ function draw_ascii(_scale,_ghost)
     and tim.game.f%5~=0 then
     return
   end
-  
+
   pal(ascii.cape[1],8)
   palt(ascii.cape[2],true)
   palt(ascii.cape[3],true)
