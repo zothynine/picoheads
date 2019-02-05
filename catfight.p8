@@ -66,12 +66,13 @@ function _init()
   shots={}
 
   enemy_types={
-    mouse={s={22,0,6,5}},
-    rat={s={16,0,6,5},shots={iv=2}},
-    flea={s={46,0,9,9},shots={iv=1}},
+    mouse={name="mouse",s={22,0,6,5}},
+    rat={name="rat",s={16,0,6,5},shots={iv=2}},
+    flea={name="flea",s={46,0,9,9},shots={iv=1}},
   }
 
   swarms={
+    single={{0,0}},
     line4={{0,0},{10,0},{20,0},{30,0}},
     line6={{0,0},{10,0},{20,0},{30,0},{40,0},{50,0}},
     stack3={{0,0},{0,10},{0,-10}},
@@ -84,123 +85,125 @@ function _init()
   levels={
     {
       {tim="0:3:0",
-        swarm=swarms.line4,
-        e_type=enemy_types.mouse,
+        swarm=swarms.single,
+        e_type=enemy_types.flea,
         path="linear",
         x=127,
         y=25,
         count=#swarms.line4,
         dirty=false,
         health=2,
-        enemies={}},
+        enemies={},
+        stop=64},
       {tim="0:6:0",
-        swarm=swarms.line4,
-        e_type=enemy_types.flea,
-        path="linear",
-        x=127,
-        y=90,
-        count=#swarms.line4,
-        dirty=false,
-        enemies={}},
-      {tim="0:9:0",
-        swarm=swarms.line4,
-        e_type=enemy_types.mouse,
-        path="linear",
-        x=127,
-        y=40,
-        count=#swarms.line4,
-        dirty=false,
-        enemies={}},
-      {tim="0:9:0",
-        swarm=swarms.line4,
-        e_type=enemy_types.mouse,
-        path="linear",
-        x=127,
-        y=80,
-        count=#swarms.line4,
-        dirty=false,
-        enemies={}},
-      {tim="0:11:0",
-        swarm=swarms.tri_s,
-        e_type=enemy_types.mouse,
-        path="linear",
-        x=127,
-        y=60,
-        count=#swarms.tri_s,
-        dirty=false,
-        enemies={}},
-      {tim="0:15:0",
         swarm=swarms.circle,
         e_type=enemy_types.rat,
         path="linear",
-        x=128,
-        y=60,
-        count=swarms.circle.n,
-        dirty=false,
-        enemies={}},
-      {tim="0:15:0",
-        swarm=swarms.line6,
-        e_type=enemy_types.rat,
-        path="wave",
-        x=128,
-        y=30,
-        count=#swarms.line6,
-        dirty=false,
-        enemies={}},
-      {tim="0:15:0",
-        swarm=swarms.line6,
-        e_type=enemy_types.rat,
-        path="wave",
-        x=128,
+        x=127,
         y=90,
-        count=#swarms.line6,
-        dirty=false,
-        enemies={}},
-      {tim="0:30:0",
-        swarm=swarms.line6,
-        e_type=enemy_types.mouse,
-        path="slope",
-        x=128,
-        y=25,
-        count=#swarms.line6,
-        dirty=false,
-        enemies={}},
-      {tim="0:36:0",
-        swarm=swarms.tri_s,
-        e_type=enemy_types.mouse,
-        path="circle",
-        x=128,
-        y=40,
-        count=#swarms.tri_s,
-        dirty=false,
-        enemies={}},
-      {tim="0:42:0",
-        swarm=swarms.stack3,
-        e_type=enemy_types.mouse,
-        path="linear",
-        x=128,
-        y=60,
-        count=#swarms.stack3,
-        dirty=false,
-        enemies={}},
-      {tim="0:42:30",
-        swarm=swarms.stack5,
-        e_type=enemy_types.rat,
-        path="linear",
-        x=128,
-        y=60,
-        count=#swarms.stack5,
-        dirty=false,
-        enemies={}},
-      {tim="0:45:0",
-        swarm=swarms.circle,
-        e_type=enemy_types.rat,
-        path="linear",
-        x=128,
-        y=60,
         count=swarms.circle.n,
         dirty=false,
-        enemies={}}
+        enemies={},
+        stop=70},
+      -- {tim="0:9:0",
+      --   swarm=swarms.line4,
+      --   e_type=enemy_types.mouse,
+      --   path="linear",
+      --   x=127,
+      --   y=40,
+      --   count=#swarms.line4,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:9:0",
+      --   swarm=swarms.line4,
+      --   e_type=enemy_types.mouse,
+      --   path="linear",
+      --   x=127,
+      --   y=80,
+      --   count=#swarms.line4,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:11:0",
+      --   swarm=swarms.tri_s,
+      --   e_type=enemy_types.mouse,
+      --   path="linear",
+      --   x=127,
+      --   y=60,
+      --   count=#swarms.tri_s,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:15:0",
+      --   swarm=swarms.circle,
+      --   e_type=enemy_types.rat,
+      --   path="linear",
+      --   x=128,
+      --   y=60,
+      --   count=swarms.circle.n,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:15:0",
+      --   swarm=swarms.line6,
+      --   e_type=enemy_types.rat,
+      --   path="wave",
+      --   x=128,
+      --   y=30,
+      --   count=#swarms.line6,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:15:0",
+      --   swarm=swarms.line6,
+      --   e_type=enemy_types.rat,
+      --   path="wave",
+      --   x=128,
+      --   y=90,
+      --   count=#swarms.line6,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:30:0",
+      --   swarm=swarms.line6,
+      --   e_type=enemy_types.mouse,
+      --   path="slope",
+      --   x=128,
+      --   y=25,
+      --   count=#swarms.line6,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:36:0",
+      --   swarm=swarms.tri_s,
+      --   e_type=enemy_types.mouse,
+      --   path="circle",
+      --   x=128,
+      --   y=40,
+      --   count=#swarms.tri_s,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:42:0",
+      --   swarm=swarms.stack3,
+      --   e_type=enemy_types.mouse,
+      --   path="linear",
+      --   x=128,
+      --   y=60,
+      --   count=#swarms.stack3,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:42:30",
+      --   swarm=swarms.stack5,
+      --   e_type=enemy_types.rat,
+      --   path="linear",
+      --   x=128,
+      --   y=60,
+      --   count=#swarms.stack5,
+      --   dirty=false,
+      --   enemies={}},
+      -- {tim="0:45:0",
+      --   swarm=swarms.circle,
+      --   e_type=enemy_types.rat,
+      --   path="linear",
+      --   x=128,
+      --   y=60,
+      --   count=swarms.circle.n,
+      --   dirty=false,
+      --   enemies={}}
     }
   }
 
@@ -490,7 +493,8 @@ function update_shots()
     local _shot=shots[i]
     local _x=_shot.x
 
-    _shot.x-=2
+    _shot.x+=_shot.dx
+    _shot.y+=_shot.dy
 
     -- delete shot when out of bounds
     if (_x+_shot.w<0) del(shots,_shot)
@@ -579,7 +583,9 @@ function update_enemies()
         if (not _dirty and _w.x>70) _w.x-=0.5
         _e.x=_w.x+_w.swarm.r*cos(_e.a)
         _e.y=_w.y+_w.swarm.r*sin(_e.a)
-        if _w.x<=70 then
+        
+        if _w.x<=_w.stop then
+          _w.stopped=true
           _e.a+=0.01
           _e.x=_w.x+_w.swarm.r*cos(_e.a)
           _e.y=_w.y+_w.swarm.r*sin(_e.a)
@@ -588,8 +594,13 @@ function update_enemies()
         if _e.x+_e.w<0 then
           delete_enemy(_w,_e)
         end
-        if (not _dirty) _w.x-=0.5
-        _e.x=_w.x+_w.swarm[_e.si][1]
+        
+        if _w.stop and _w.x >= _w.stop then
+          if (not _dirty) _w.x-=0.5
+          _e.x=_w.x+_w.swarm[_e.si][1]
+        elseif _w.stop and _w.x < _w.stop then
+          _w.stopped=true
+        end
       elseif _w.path=="wave" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
         if (not _dirty) _w.x-=0.5
@@ -615,13 +626,26 @@ function update_enemies()
       end
 
       if _w.e_type.shots then
-        if tim.game.s%_w.e_type.shots.iv==0
-          and tim.game.f==0
-          and _e.x < 128-_e.w then
-          add(shots,{x=_e.x,y=_e.y+3,w=3,h=1})
+        if (_w.stop and _w.stopped)
+          or not _w.stop then
+          if tim.game.s%_w.e_type.shots.iv==0
+            and tim.game.f==0
+            and _e.x < 128-_e.w then
+            if _w.e_type.name=="flea" then
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=-1,dy=0})
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=-1,dy=-1})
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=0,dy=-1})
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=1,dy=-1})
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=1,dy=0})
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=1,dy=1})
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=0,dy=1})
+              add(shots,{x=_e.x+5,y=_e.y+5,w=4,h=1,dx=-1,dy=1})
+            else
+              add(shots,{x=_e.x,y=_e.y+4,w=3,h=1,dx=-1,dy=0})
+            end
+          end
         end
       end
-
       if collision(_e,ascii.hitbox) then
         ascii_hit()
       end
@@ -760,10 +784,13 @@ function draw_shots()
   end
 
   for i=1,#shots do
-    local _x=shots[i].x
-    local _y=shots[i].y
-    local _w=shots[i].w
-    line(_x,_y,_x+_w,_y,11)
+    local _s=shots[i]
+    local _x=_s.x
+    local _y=_s.y
+    local _dx=_s.dx
+    local _dy=_s.dy
+    local _w=_s.w
+    line(_x,_y,_x+(_dx*_w),_y+(_dy*_w),11)
   end
 end
 
@@ -848,8 +875,8 @@ function draw_game()
   rectfill(0,0,127,127,1)
   draw_map()
   foreach(clouds,draw_cloud)
-
   draw_ascii()
+  draw_shots()
 
   for i=1,#enemy_waves do
     local _w=enemy_waves[i]
@@ -862,7 +889,6 @@ function draw_game()
     end
   end
 
-  draw_shots()
   draw_infobar()
   foreach(powerups, draw_pwrups)
 end
