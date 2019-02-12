@@ -72,39 +72,35 @@ function _init()
   }
 
   swarms={
-    single={{0,0}},
-    line4={{0,0},{10,0},{20,0},{30,0}},
-    line6={{0,0},{10,0},{20,0},{30,0},{40,0},{50,0}},
-    stack3={{0,0},{0,10},{0,-10}},
-    stack5={{0,0},{0,10},{0,20},{0,-10},{0,-20}},
-    tri_s={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10}},
-    tri_l={{0,0},{10,-5},{10,5},{20,-10},{20,0},{20,10},{30,-15},{30,-5},{30,5},{30,15}},
+    line={name="line"},
+    stack={name="stack"},
+    tri={name="tri"},
     circle={name="circle",r=15,n=8,a=0.125}
   }
 
   levels={
     {
       {tim="0:3:0",
-        swarm=swarms.single,
-        e_type=enemy_types.flea,
+        swarm=swarms.stack,
+        e_type=enemy_types.mouse,
         path="linear",
         x=127,
-        y=25,
-        count=#swarms.line4,
+        y=20,
+        count=10,
         dirty=false,
         health=2,
         enemies={},
         stop=64},
-      {tim="0:6:0",
-        swarm=swarms.circle,
-        e_type=enemy_types.rat,
-        path="linear",
-        x=127,
-        y=90,
-        count=swarms.circle.n,
-        dirty=false,
-        enemies={},
-        stop=70},
+      -- {tim="0:6:0",
+      --   swarm=swarms.circle,
+      --   e_type=enemy_types.rat,
+      --   path="linear",
+      --   x=127,
+      --   y=90,
+      --   count=swarms.circle.n,
+      --   dirty=false,
+      --   enemies={},
+      --   stop=70},
       -- {tim="0:9:0",
       --   swarm=swarms.line4,
       --   e_type=enemy_types.mouse,
@@ -507,8 +503,33 @@ function update_shots()
   end
 end
 
+function update_enemy(_w, _i)
+  if _w.swarm.name=="line" then
+    _x=_w.x+(_i-1)*10
+    _y=_w.y
+    return _x,_y
+  elseif _w.swarm.name=="stack" then
+    _x=_w.x
+    _y=_w.y+(_i-1)*10
+    return _x,_y
+  elseif _w.swarm.name=="tri" then
+    -- 1 2 4 7 12
+    if i==1 then
+      _x=_w.x
+      _y=_w.y
+    elseif _i%2==0 then
+      _x=_w.x+(_i/2*10)
+      _y=_w.y+(_i/2*5)
+    else
+      _x=_w.x+(flr(_i/2)*10)
+      _y=_w.y+((flr(_i/2)*5) * -1)
+    end
+    return _x,_y
+  end
+end
+
 function create_wave(_w)
-  local _n=#_w.swarm
+  local _n=_w.count
   if (_w.swarm.name=="circle") _n=_w.swarm.n
   local _x=0
   local _y=0
@@ -519,8 +540,7 @@ function create_wave(_w)
       _x=_w.x+_w.swarm.r*cos(_a)
       _y=_w.y+_w.swarm.r*sin(_a)
     else
-      _x=_w.x+_w.swarm[i][1]
-      _y=_w.y+_w.swarm[i][2]
+      _x,_y = update_enemy(_w, i)
     end
 
     if _w.path=="circle" then
@@ -531,8 +551,8 @@ function create_wave(_w)
         ox=127,
         oy=127,
         a=0.25-0.003,
-        w=6,
-        h=5,
+        w=_w.e_type.s[3],
+        h=_w.e_type.s[4],
         health=_w.health or 1,
         r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y))})
     else
@@ -543,8 +563,8 @@ function create_wave(_w)
         ox=nil,
         oy=nil,
         a=_a,
-        w=6,
-        h=5,
+        w=_w.e_type.s[3],
+        h=_w.e_type.s[4],
         health=_w.health or 1,
         r=sqrt((_w.x-127)*(_w.x-127)+(127-_w.y)*(127-_w.y))})
     end
@@ -597,7 +617,7 @@ function update_enemies()
         
         if _w.stop and _w.x >= _w.stop then
           if (not _dirty) _w.x-=0.5
-          _e.x=_w.x+_w.swarm[_e.si][1]
+          _e.x,_e.y=update_enemy(_w,_e.si)
         elseif _w.stop and _w.x < _w.stop then
           _w.stopped=true
         end
@@ -605,24 +625,21 @@ function update_enemies()
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
         if (not _dirty) _w.x-=0.5
         local _wave_y=_w.y+(sin(_w.x/12)*10)
-        _e.x=_w.x+_w.swarm[_e.si][1]
-        _e.y=_wave_y+_w.swarm[_e.si][2]
+        _e.x,_e.y=update_enemy(_w,_e.si)
       elseif _w.path=="slope" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
         if _w.x<97 and _w.x>30 and _w.y<87 then
           if (not _dirty) _w.y+=0.4
         end
         if (not _dirty) _w.x-=0.5
-        _e.x=_w.x+_w.swarm[_e.si][1]
-        _e.y=_w.y+_w.swarm[_e.si][2]
+        _e.x,_e.y=update_enemy(_w,_e.si)
       elseif _w.path=="circle" then
         if (_e.y>127) delete_enemy(_w,_e)
         _e.a+=0.003
         if (_e.a > 1) _e.a=0
         if (not _dirty) _w.x=_e.ox+_e.r*cos(_e.a)
         if (not _dirty) _w.y=_e.oy+_e.r*sin(_e.a)
-        _e.x=_w.x+_w.swarm[_e.si][1]
-        _e.y=_w.y+_w.swarm[_e.si][2]
+        _e.x,_e.y=update_enemy(_w,_e.si)
       end
 
       if _w.e_type.shots then
