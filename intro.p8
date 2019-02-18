@@ -12,8 +12,8 @@ function _init()
 		ln4="",
 		txt1="wir entwickeln",
 		txt2="presented by picoheads",
-		txt3="episode #23:",
-		txt4="stop and go!",
+		txt3="episode #24:",
+		txt4="achtung, feind von unten!",
 		x=6,
 		ln1_y=15,
 		ln2_y=26,
@@ -22,7 +22,7 @@ function _init()
 		speed=5,
 		⧗=5
 	}
-	
+
 	--cursor
 	cur={
 		x=-10,
@@ -46,7 +46,7 @@ function _init()
 		cur=30,
 		glitches=80
 	}
-	
+
 	music(0)
 end
 
@@ -57,20 +57,20 @@ end
 function _update60()
 	⧗.cur-=1
 	if (⧗.cur==0) ⧗.cur=cur.blink
-	
+
 	--cursor blinking
 	if ⧗.cur<cur.blink/2 then
 		cur.c=1
 	else
 		cur.c=8
 	end
-	
+
 	--typing timer
 	text.⧗-=1
 	if (text.⧗==0) then
 		text.⧗=text.speed+flr(rnd(10))
 	end
-	
+
 	--title animation
 	if #text.ln1<#text.txt1 then
 		if text.⧗==1 then
@@ -78,7 +78,7 @@ function _update60()
 		end
 		cur.x = text.x+#text.ln1*4
 		cur.y = text.ln1_y-1
-	
+
 	elseif #text.ln2<#text.txt2 then
 		if text.⧗==1 then
 			text.ln2=sub(text.txt2,0,#text.ln2+1)
@@ -88,7 +88,7 @@ function _update60()
 	else
 		titles_done=true
 	end
-	
+
 	--avatars animation
 	if titles_done then
 		if not av_done then
@@ -102,7 +102,7 @@ function _update60()
  		end
 		end
 	end
-	
+
 	if av_done then
 		if #text.ln3<#text.txt3 then
 			if text.⧗==1 then
@@ -118,13 +118,13 @@ function _update60()
 			cur.y = text.ln4_y-1
 		end
 	end
-		
+
 	--ending
 	if #text.ln4==#text.txt4 then
 		if ⧗.ending>0 then
 			⧗.ending-=1
 		end
-	end		
+	end
 end
 
 function _draw()
@@ -143,9 +143,9 @@ function _draw()
 	print(kl,kx-(#kl*2)+3,avy+18,6)
 
 	if ⧗.ending==0 then
-		
+
 		if (⧗.glitches>0) ⧗.glitches-=1
-		
+
 		if ⧗.glitches==79 then
 			music(2)
 		elseif ⧗.glitches==40 then

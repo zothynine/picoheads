@@ -15,31 +15,33 @@ end
 
 function _update60()
 	timer+=1
-	local _mtrigger = 45
-	--local _itrigger = 23 --guest
-	local _ktrigger = 90
+	local _mtrigger = 45 --mario
+	local _itrigger = 23 --guest
+	-- local _ktrigger = 90 --klemens
 	if (timer==120) timer=0
 	y=mid(0,y+1, 112)
-	
+
 	if y==112 then
+		--mario
 		if timer==_mtrigger then
 			add(bubbles,{bx=mx+4,by=y+6,s=flr(rnd(4))})
 		end
-		
+
 		--guest
-		-- if timer==_itrigger then
-		-- 	add(bubbles,{bx=ix+4,by=y+6,s=flr(rnd(4))})
-		-- end
-		
-		if timer==_ktrigger then
-			add(bubbles,{bx=kx+4,by=y+6,s=flr(rnd(4))})
+		if timer==_itrigger then
+			add(bubbles,{bx=ix+4,by=y+6,s=flr(rnd(4))})
 		end
+
+		--klemens
+		-- if timer==_ktrigger then
+		-- 	add(bubbles,{bx=kx+4,by=y+6,s=flr(rnd(4))})
+		-- end
 	end
-		
+
 	if (y>54 and y<64) addsplashes()
-	
+
 	updatesplashes()
-	
+
 	if btn(❎)
 	 or btn(🅾️)
 	 or btn(⬅️)
@@ -53,14 +55,14 @@ end
 function updatesplashes()
 	for i = #splashes,1,-1 do
 		local s = splashes[i]
-		
+
 		if s.d == "l" then
 			s.x -= 1+flr(rnd(3))
 		else
 			s.x += 1+flr(rnd(3))
 		end
-		
-		
+
+
 		s.y += -3+flr(rnd(3))
 		s.lt -= 1
 		if s.lt < 1 then
@@ -79,19 +81,19 @@ function addsplashes()
 	add(splashes,{d="r",x=mx+7,y=_y,lt=flr(rnd(6))})
 	add(splashes,{d="r",x=mx+7,y=_y,lt=flr(rnd(6))})
 	--guest
-	-- add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
 	--klemens
-	add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
 end
 
 function pixel_under_water(c,r)
@@ -103,62 +105,59 @@ function _draw()
 	map(0,0,0,0,16,16)
 	print("wir entwickeln",6,15,6)
 	print("presented by picoheads",6,25,6)
-	print("episode #23 startet in kuerze",6,35,6)
-	spr(0,mx,y,1,2)
-	--spr(33,ix,y,1,2) --guest
-	spr(32,kx,y,1,2)
+	print("episode #24 startet in kuerze",6,35,6)
+	spr(0,mx,y,1,2) --mario
+	spr(33,ix,y,1,2) --guest
+	-- spr(32,kx,y,1,2) --klemens
 
-	
+
 	for row=0,16 do
 		for colm=0,8 do
 			if not pixel_under_water(colm,row) then
 				local mpixel = pget(mx+colm,y+row)
 				local ipixel = pget(ix+colm,y+row)
 				local kpixel = pget(kx+colm,y+row)
-				
+
 				--mario
-					
- 				
  				if mpixel != 1
  							and mpixel >= 1
  							and mpixel != 7 then
  					pset(mx+colm,y+row,6)
  				end
-				
+
 				--guest
- 				-- if ipixel != 1
- 				-- 			and ipixel >= 1
- 				-- 			and ipixel != 7 then
- 				-- 	pset(ix+colm,y+row,6)
- 				-- end		
+ 				if ipixel != 1
+ 							and ipixel >= 1
+ 							and ipixel != 7 then
+ 					pset(ix+colm,y+row,6)
+ 				end
 
 				--klemens
-
- 				if kpixel != 1
- 							and kpixel >= 1
- 							and kpixel != 7 then 
- 					pset(kx+colm,y+row,6)
- 				end
+ 				-- if kpixel != 1
+ 				-- 			and kpixel >= 1
+ 				-- 			and kpixel != 7 then
+ 				-- 	pset(kx+colm,y+row,6)
+ 				-- end
 			end
 		end
 	end
-	
+
 	for bubble in all(bubbles) do
 		local x=bubble.bx
 		local y=bubble.by
 		local size=bubble.s
-		
+
 		--pset(x,y,7)
 		sspr(8,8,6,6,x,y,size,size)
-		
+
 		bubble.by-=0.3
 		bubble.s+=0.05
 		if bubble.by < 64 then
 			del(bubbles,bubble)
 		end
 	end
-	
-	
+
+
 	for splash in all(splashes) do
 		local x = splash.x
 		local y = splash.y
