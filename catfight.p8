@@ -7,6 +7,10 @@ __lua__
 -- 00 laser
 -- 01 explosion
 
+--todo
+-- function for print variants
+-- (shadow, outline, alignment, etc.)
+
 function _init()
   lvltim=180
 
@@ -35,6 +39,7 @@ function _init()
     plxa2_x=128,
     plxb1_x=0,
     plxb2_x=128,
+    gnd_spd=0.5
   }
 
   powerups_defs={
@@ -67,9 +72,9 @@ function _init()
 
   enemy_types={
     mouse={name="mouse",s={22,0,6,5}},
-    rat={name="rat",s={16,0,6,5},shots={iv=2}},
-    flea={name="flea",s={46,0,9,9},shots={iv=1}},
-    cannon={name="cannon",s={56,1,7,7},shots={iv=1}}
+    rat={name="rat",s={16,0,6,5},shots={iv=2,unit="s"}},
+    flea={name="flea",s={46,0,9,9},shots={iv=1,unit="s"}},
+    cannon={name="cannon",s={56,1,7,7},shots={iv=15,unit="f"}}
   }
 
   swarms={
@@ -82,16 +87,16 @@ function _init()
   levels={
     {
       {tim="0:3:0",
-        swarm=swarms.line,
+        swarm=swarms.stack,
         e_type=enemy_types.mouse,
         path="linear",
         x=127,
-        y=64,
-        count=15,
+        y=24,
+        count=5,
         dirty=false,
         health=2,
         enemies={},
-        stop=64},
+        stop=30},
       {tim="0:6:0",
         swarm=swarms.line,
         e_type=enemy_types.cannon,
@@ -297,6 +302,8 @@ end
 function update_lvlstart()
   update_clouds()
   update_cape()
+  ascii.x=56
+  ascii.y=55
   tim.lvlstart -= 1
   if tim.lvlstart < 1 then
     setuplvl()
@@ -617,12 +624,14 @@ function update_enemies()
       elseif _w.path=="linear" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
         
-        if _w.stop and _w.x < _w.stop then
-          _w.stopped=true
-        else
-          if (not _dirty) _w.x-=0.5
-          _e.x,_e.y=update_enemy(_w,_e.si)
+        if not _dirty then
+          if _w.stop and _w.x < _w.stop then
+            _w.stopped=true
+          else
+            _w.x-=0.5
+          end
         end
+        _e.x,_e.y=update_enemy(_w,_e.si)
       elseif _w.path=="wave" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
         if (not _dirty) _w.x-=0.5
@@ -644,14 +653,14 @@ function update_enemies()
         _e.x,_e.y=update_enemy(_w,_e.si)
       elseif _w.path=="floor" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
-        if (not _dirty) _w.x-=1
+        if (not _dirty) _w.x-=maps.gnd_spd
         _e.x,_e.y=update_enemy(_w,_e.si)
       end
 
       if _w.e_type.shots then
         if (_w.stop and _w.stopped)
           or not _w.stop then
-          if tim.game.s%_w.e_type.shots.iv==0
+          if tim.game[_w.e_type.shots.unit]%_w.e_type.shots.iv==0
             and tim.game.f==0
             and _e.x < 128-_e.w then
             if _w.e_type.name=="flea" then
@@ -736,18 +745,19 @@ function update_clouds()
 end
 
 function update_map()
-  maps.gnd1_x-=1
-  maps.gnd2_x-=1
-  maps.plxa1_x-=0.5
-  maps.plxa2_x-=0.5
-  maps.plxb1_x-=0.2
-  maps.plxb2_x-=0.2
-  if (maps.gnd1_x<=-128) maps.gnd1_x=128
-  if (maps.gnd2_x<=-128) maps.gnd2_x=128
-  if (maps.plxa1_x<=-128) maps.plxa1_x=128
-  if (maps.plxa2_x<=-128) maps.plxa2_x=128
-  if (maps.plxb1_x<=-128) maps.plxb1_x=128
-  if (maps.plxb2_x<=-128) maps.plxb2_x=128
+  local _m=maps
+  _m.gnd1_x-=_m.gnd_spd
+  _m.gnd2_x-=_m.gnd_spd
+  _m.plxa1_x-=_m.gnd_spd/2
+  _m.plxa2_x-=_m.gnd_spd/2
+  _m.plxb1_x-=_m.gnd_spd/4
+  _m.plxb2_x-=_m.gnd_spd/4
+  if (_m.gnd1_x<=-128) _m.gnd1_x=128
+  if (_m.gnd2_x<=-128) _m.gnd2_x=128
+  if (_m.plxa1_x<=-128) _m.plxa1_x=128
+  if (_m.plxa2_x<=-128) _m.plxa2_x=128
+  if (_m.plxb1_x<=-128) _m.plxb1_x=128
+  if (_m.plxb2_x<=-128) _m.plxb2_x=128
 end
 
 function update_cape()
@@ -839,7 +849,7 @@ function draw_ascii(_scale,_ghost)
   local _scale=_scale or 1
   local _ghost=_ghost or false
 
-  if (ascii.has_shield) draw_shield(get_powerup("shield"))
+  if (ascii.has_shield) draw_shield(get_powerup("shield"),_scale)
   if ascii.collided
     and not ascii.has_shield
     and tim.game.f%5~=0 then
@@ -881,7 +891,8 @@ function draw_pwrups(_p)
   sspr(_p.sx,_p.sy,_p.w,_p.h,_p.x,_p.y)
 end
 
-function draw_shield(_shield)
+function draw_shield(_shield,_scale)
+  local _scale=_scale or 1
   if _shield.lt==2 then
     _shield.col=9
   elseif _shield.lt==1 then
@@ -891,7 +902,7 @@ function draw_shield(_shield)
     and tim.game.f%5~=0 then
     return
   else
-    circ(ascii.x+(ascii.w/2),ascii.y+(ascii.h/2),_shield.r,_shield.col)
+    circ(ascii.x+(ascii.w*_scale/2),ascii.y+(ascii.h*_scale/2),_shield.r*_scale,_shield.col)
   end
 end
 
@@ -922,9 +933,10 @@ end
 function update_lvlend()
   update_clouds()
   update_cape()
-  if (ascii.x < 128) ascii.x+=1
+  if (ascii.x < 138) ascii.x+=1
 
-  if btn(5) then
+  -- button c
+  if btn(4) then
     _update60=update_lvlstart
     _draw=draw_lvlstart
   end
@@ -937,10 +949,14 @@ function draw_lvlend()
   draw_map()
   draw_infobar()
   draw_ascii()
+  -- shadow; todo: move to function
   print_center("level 1 finished", 49, 0)
+  -- text
   print_center("level 1 finished", 50, 7)
-  print_center("press x to continue", 59, 0)
-  print_center("press x to continue", 60, 7)
+  -- shadow
+  print_center("press c to continue", 59, 0)
+  -- text
+  print_center("press c to continue", 60, 7)
 end
 -->8
 --game over
