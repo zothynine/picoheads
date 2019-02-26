@@ -20,8 +20,8 @@ function _update60()
 
 	timer+=1
 	local _mtrigger = 45 --mario
-	local _itrigger = 23 --guest
-	-- local _ktrigger = 90 --klemens
+	-- local _itrigger = 23 --guest
+	local _ktrigger = 90 --klemens
 	if (timer==120) timer=0
 	if time()>15 then
 		y=mid(-16,y-1, 112)
@@ -34,14 +34,14 @@ function _update60()
 		end
 
 		--guest
-		if timer==_itrigger then
-			add(bubbles,{bx=ix+4,by=y+6,s=flr(rnd(4))})
-		end
+		-- if timer==_itrigger then
+		-- 	add(bubbles,{bx=ix+4,by=y+6,s=flr(rnd(4))})
+		-- end
 
 		--klemens
-		-- if timer==_ktrigger then
-		-- 	add(bubbles,{bx=kx+4,by=y+6,s=flr(rnd(4))})
-		-- end
+		if timer==_ktrigger then
+			add(bubbles,{bx=kx+4,by=y+6,s=flr(rnd(4))})
+		end
 	end
 
 	if (y>54 and y<64) addsplashes()
@@ -77,19 +77,19 @@ function addsplashes()
 	add(splashes,{d="r",x=mx+7,y=_y,lt=flr(rnd(6))})
 	add(splashes,{d="r",x=mx+7,y=_y,lt=flr(rnd(6))})
 	--guest
-	add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
-	add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="l",x=ix,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
+	-- add(splashes,{d="r",x=ix+7,y=_y,lt=flr(rnd(6))})
 	--klemens
-	-- add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
-	-- add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="l",x=kx,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
+	add(splashes,{d="r",x=kx+7,y=_y,lt=flr(rnd(6))})
 end
 
 function pixel_under_water(c,r)
@@ -99,12 +99,12 @@ end
 function _draw()
 	cls()
 	map(0,0,0,0,16,16)
-	print("das war episode #24",txt_x,y-97,6)
+	print("das war episode #25",txt_x,y-97,6)
 	print("vielen dank fuers zusehen",txt_x,y-87,6)
 	print("bis zum naechsten mal",txt_x,y-77,6)
 	spr(0,mx,y,1,2) --mario
-	spr(33,ix,y,1,2) --guest
-	-- spr(32,kx,y,1,2) --klemens
+	-- spr(33,ix,y,1,2) --guest
+	spr(32,kx,y,1,2) --klemens
 	--print("wir danken:",txt_x,y+20,6)
 	--print("gerlinde hinterleitner",txt_x,y+30,6)
 	--print("daniel koller",txt_x,y+37,6)
@@ -112,7 +112,7 @@ function _draw()
 	print("wir danken",txt_x,y+25,6)
 	print("der tollen community",txt_x,y+35,6)
 	print("auf derstandard.at",txt_x,y+45,6)
-	print("episode #25 am 26.2. - 19:00",txt_x,y+55,7)
+	print("episode #26 am 5.3. - 19:00",txt_x,y+55,7)
 	print("auf dst.at/picoheads",txt_x,y+65,7)
 	print("twitter:",txt_x,y+90,7)
 	print("@freddychops, @zothynine",txt_x,y+100,7)
@@ -123,8 +123,8 @@ function _draw()
 		for colm=0,8 do
 			if not pixel_under_water(colm,row) then
 				local mpixel = pget(mx+colm,y+row)
-				local ipixel = pget(ix+colm,y+row) --guest
-				-- local kpixel = pget(kx+colm,y+row)
+				-- local ipixel = pget(ix+colm,y+row) --guest
+				local kpixel = pget(kx+colm,y+row)
 
 				--mario
  				if mpixel != 1
@@ -134,18 +134,18 @@ function _draw()
  				end
 
 				--guest
- 				if ipixel != 1
- 							and ipixel >= 1
- 							and ipixel != 7 then
- 					pset(ix+colm,y+row,6)
- 				end
+ 				-- if ipixel != 1
+ 				-- 			and ipixel >= 1
+ 				-- 			and ipixel != 7 then
+ 				-- 	pset(ix+colm,y+row,6)
+ 				-- end
 
 				--klemens
- 				-- if kpixel != 1
- 				-- 			and kpixel >= 1
- 				-- 			and kpixel != 7 then
- 				-- 	pset(kx+colm,y+row,6)
- 				-- end
+ 				if kpixel != 1
+ 							and kpixel >= 1
+ 							and kpixel != 7 then
+ 					pset(kx+colm,y+row,6)
+ 				end
 			end
 		end
 	end
