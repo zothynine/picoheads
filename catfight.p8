@@ -14,6 +14,8 @@ __lua__
 function _init()
   lvltim=180
 
+  transp={}
+
   boss={
     visible=false,
     nozzle_timer=rnd(450),
@@ -93,26 +95,26 @@ function _init()
 
   levels={
     {
-      {tim="0:3:0",
-        swarm=swarms.stack,
-        e_type=enemy_types.rat,
-        path="linear",
-        x=127,
-        y=24,
-        count=5,
-        dirty=false,
-        health=2,
-        enemies={},
-        stop=30},
-      {tim="0:6:0",
-        swarm=swarms.line,
-        e_type=enemy_types.cannon,
-        path="floor",
-        x=127,
-        y=120-enemy_types.cannon.s[4],
-        count=1,
-        dirty=false,
-        enemies={}},
+      -- {tim="0:3:0",
+      --   swarm=swarms.stack,
+      --   e_type=enemy_types.rat,
+      --   path="linear",
+      --   x=127,
+      --   y=24,
+      --   count=5,
+      --   dirty=false,
+      --   health=2,
+      --   enemies={},
+      --   stop=30},
+      -- {tim="0:6:0",
+      --   swarm=swarms.line,
+      --   e_type=enemy_types.cannon,
+      --   path="floor",
+      --   x=127,
+      --   y=120-enemy_types.cannon.s[4],
+      --   count=1,
+      --   dirty=false,
+      --   enemies={}},
       {
         delay=300,
         swarm=swarms.line,
@@ -343,15 +345,51 @@ end
 --game
 function collision(_a,_b)
   --test if shot hits emeny
-
   if _a.x+_a.w>=_b.x
     and _a.x<_b.x+_b.w
     and _a.y+_a.h>=_b.y
     and _a.y<=_b.y+_b.h then
-    return true
+    return check_transparency(_a,_b)
   else
     return false
   end
+end
+
+function check_transparency(_a,_b)
+  local _cols={}
+  local _collided=false
+
+  if _a.x+_a.w>=_b.x
+    and _a.x<_b.x+_b.w then
+    if (_a.y<_b.y) then
+      for i=_b.y,_a.y+_a.h do
+        add(_cols,pget(_a.x,_b.y))
+      end
+    else
+      for i=_a.y,_b.y+_b.h do
+        add(_cols,pget(_a.x,_a.y))
+      end
+    end
+  elseif _a.y+_a.h>=_b.y
+    and _a.y<=_b.y+_b.h then
+    if (_a.x<_b.x) then
+      for i=_b.x,_a.x+_a.w do
+        add(_cols,pget(_b.x,_a.y))
+      end
+    else
+      for i=_a.x,_b.x+_b.w do
+        add(_cols,pget(_b.x,_b.y))
+      end
+    end
+  end
+
+  for i=1,#_cols do
+    for j=1,#transp do
+      if (_cols[i]!=transp[i]) _collided=true
+    end
+  end
+  transp={}
+  return _collided
 end
 
 function update_ascii(_shield)
@@ -888,7 +926,10 @@ end
 function draw_boss(_w,_e)
   pal(boss.nozzle_pos,5)
   for i=10,12 do
-    if (i~=boss.nozzle_pos) palt(i,true)
+    if i~=boss.nozzle_pos then
+      palt(i,true)
+      add(transp,i)
+    end
   end
   draw_enemy(_w,_e)
   pal()
@@ -989,7 +1030,7 @@ function draw_game()
   draw_infobar()
   foreach(powerups, draw_pwrups)
 
-  print(boss.nozzle_pos,5,12,8)
+  print(transp[1],5,20,8)
 end
 -->8
 --game over
