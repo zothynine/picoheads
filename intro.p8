@@ -12,7 +12,7 @@ function _init()
 		ln4="",
 		txt1="wir entwickeln",
 		txt2="presented by picoheads",
-		txt3="episode #26:",
+		txt3="episode #31:",
 		txt4="schoenere pixel",
 		x=6,
 		ln1_y=15,
