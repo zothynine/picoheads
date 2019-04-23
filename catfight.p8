@@ -26,6 +26,7 @@ function _init()
     next_cloud=0
   }
 
+  -- height of the top info bar
   ui_h=8
 
   score=0
@@ -111,6 +112,15 @@ function _init()
 
   cur_lvl=1
 
+  boss={
+    nozzle={x=95,y=52,w=3,h=8},
+    hose={x=98,y=56,w=2,h=8},
+    body={x=100,y=60,w=16,h=8},
+    active=false,
+    maxhealth=100,
+    health=10
+  }
+
   enemy_waves={}
 
   _update60=update_start
@@ -166,6 +176,7 @@ function setuplvl()
   if cur_lvl>#levels then
     _update60=update_bosslvl
     _draw=draw_bosslvl
+    boss.active=true
   else
     enemy_waves=shallowcopy(levels[cur_lvl])
   end
@@ -256,6 +267,12 @@ function collision(_a,_b)
   else
     return false
   end
+end
+
+function boss_collision(_shot)
+  return collision(_shot, boss.body) or
+  collision(_shot, boss.hose) or
+  collision(_shot, boss.nozzle)
 end
 
 function update_ascii(_shield)
@@ -411,6 +428,13 @@ function update_shots()
           end
           del(ascii.shots,_shot)
         end
+      end
+    end
+
+    if boss.active then
+      if boss_collision(_shot) then
+        del(ascii.shots,_shot)
+        if (boss.health>0) boss.health-=1
       end
     end
   end
@@ -874,10 +898,15 @@ function draw_game()
   foreach(powerups, draw_pwrups)
 end
 
+function draw_boss_health()
+  rect(29,1,29+(boss.maxhealth/2)+2,7,7)
+  if(boss.health>0) rectfill(30,2,30+(boss.health/2),6,8)
+end
+
 function draw_boss()
-  sspr(112,32,16,8,100,60)
-  sspr(122,40,2,8,98,56)
-  sspr(125,40,3,8,95,52)
+  sspr(112,32,boss.body.w,boss.body.h,boss.body.x,boss.body.y)
+  sspr(122,40,boss.hose.w,boss.hose.h,boss.hose.x,boss.hose.y)
+  sspr(125,40,boss.nozzle.w,boss.nozzle.h,boss.nozzle.x,boss.nozzle.y)
 end
 
 function draw_bosslvl()
@@ -890,6 +919,7 @@ function draw_bosslvl()
   draw_boss()
 
   draw_infobar()
+  draw_boss_health()
   foreach(powerups, draw_pwrups)
 end
 
