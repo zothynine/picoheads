@@ -118,7 +118,20 @@ function _init()
     body={x=100,y=60,w=16,h=8},
     active=false,
     maxhealth=100,
-    health=10
+    health=10,
+    t={
+      idle=119+ceil(rnd(120)),
+      fire=479+ceil(rnd(240)),
+      vacuum=300
+    },
+    t_names={
+      "idle",
+      "fire",
+      "vacuum"
+    },
+    timer=119+ceil(rnd(120)),
+    state=1,
+    shots={}
   }
 
   enemy_waves={}
@@ -755,12 +768,50 @@ function update_game()
   update_shots()
 end
 
+function update_boss()
+  if boss.timer > 0 then
+    boss.timer-=1
+  elseif boss.timer==0 then
+    boss.state=boss.state%3+1
+    boss.timer=boss.t[boss.t_names[boss.state]]
+  end
+  
+  if boss.state==2 then --shooting
+    debug=tim.game.f
+    if tim.game.f==0 then
+      add(boss.shots,{
+        x=boss.nozzle.x-6,
+        y=boss.nozzle.y+3,
+        x_end=boss.nozzle.x-1,
+        y_end=boss.nozzle.y+4,
+        w=5,
+        h=2,
+        spd=2,
+        dir=0
+      })
+    end
+    debug=#boss.shots
+  elseif boss.state==3 then --vacuuming
+
+  end
+end
+
+function update_bossfire()
+  for i=#boss.shots,1,-1 do
+    local _shot=boss.shots[i]
+    _shot.x-=_shot.spd
+    _shot.x_end-=_shot.spd
+  end
+end
+
 function update_bosslvl()
   update_game_timer()
   update_clouds()
   update_map()
   update_cape()
   update_pwrups()
+  update_boss()
+  update_bossfire()
 
   update_ascii(get_powerup("shield"))
 
@@ -795,6 +846,15 @@ function draw_shots()
     else
       line(_x,_y,_x+(_dx*_w),_y+(_dy*_w),_c)
     end
+  end
+
+  for i=1,#boss.shots do
+    local _xs=boss.shots[i].x
+    local _ys=boss.shots[i].y
+    local _xe=boss.shots[i].x_end
+    local _ye=boss.shots[i].y_end
+    local _w=boss.shots[i].w
+    rectfill(_xs,_ys,_xe,_ye,8)
   end
 end
 
@@ -921,6 +981,8 @@ function draw_bosslvl()
   draw_infobar()
   draw_boss_health()
   foreach(powerups, draw_pwrups)
+
+  print(debug,15,20,8)
 end
 
 -->8

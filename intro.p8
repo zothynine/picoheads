@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 16
+version 18
 __lua__
 --picoheads intro
 
@@ -12,8 +12,8 @@ function _init()
 		ln4="",
 		txt1="wir entwickeln",
 		txt2="presented by picoheads",
-		txt3="episode #31:",
-		txt4="insert coin to continue",
+		txt3="episode #32:",
+		txt4="building the beast",
 		x=6,
 		ln1_y=15,
 		ln2_y=26,
