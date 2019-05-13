@@ -4,6 +4,8 @@ __lua__
 --picoheads intro
 
 function _init()
+	episode="33"
+	title="double trouble!"
 	--texts
 	text={
 		ln1="",
@@ -12,8 +14,8 @@ function _init()
 		ln4="",
 		txt1="wir entwickeln",
 		txt2="presented by picoheads",
-		txt3="episode #32:",
-		txt4="building the beast",
+		txt3="episode #"..episode..":",
+		txt4=title,
 		x=6,
 		ln1_y=15,
 		ln2_y=26,

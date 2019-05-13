@@ -4,6 +4,7 @@ __lua__
 --intro
 
 function _init()
+	episode = "33"
 	mx=40
 	ix=60
 	kx=80
@@ -105,7 +106,7 @@ function _draw()
 	map(0,0,0,0,16,16)
 	print("wir entwickeln",6,15,6)
 	print("presented by picoheads",6,25,6)
-	print("episode #32 startet in kuerze",6,35,6)
+	print("episode #"..episode.." startet in kuerze",6,35,6)
 	spr(0,mx,y,1,2) --mario
 	-- spr(33,ix,y,1,2) --guest
 	spr(32,kx,y,1,2) --klemens

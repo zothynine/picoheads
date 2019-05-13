@@ -4,6 +4,8 @@ __lua__
 --outro
 
 function _init()
+	episode=33
+	next_date="21.5"
 	mx=40
 	ix=60
 	kx=80
@@ -99,7 +101,7 @@ end
 function _draw()
 	cls()
 	map(0,0,0,0,16,16)
-	print("das war episode #31",txt_x,y-97,6)
+	print("das war episode #"..tostr(episode),txt_x,y-97,6)
 	print("vielen dank fuers zusehen",txt_x,y-87,6)
 	print("bis zum naechsten mal",txt_x,y-77,6)
 	spr(0,mx,y,1,2) --mario
@@ -112,7 +114,7 @@ function _draw()
 	print("wir danken",txt_x,y+25,6)
 	print("der tollen community",txt_x,y+35,6)
 	print("auf derstandard.at",txt_x,y+45,6)
-	print("episode #33 am 14.5. - 19:00",txt_x,y+55,7)
+	print("episode #"..tostr(episode+1).." am "..next_date.." - 19:00",txt_x,y+55,7)
 	print("auf dst.at/picoheads",txt_x,y+65,7)
 	print("twitter:",txt_x,y+90,7)
 	print("@freddychops, @zothynine",txt_x,y+100,7)
