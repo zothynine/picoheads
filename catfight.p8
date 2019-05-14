@@ -12,6 +12,8 @@ __lua__
 -- (shadow, outline, alignment, etc.)
 
 function _init()
+  debug=""
+
   lvltim=180
 
   tim={
@@ -64,8 +66,8 @@ function _init()
     lives=8,
     cape={9,10,13},
     pwrups={},
-    cooldwn=900,
-    cdtim=900,
+    cooldwn=180,
+    cdtim=180,
     hitbox={}
   }
 
@@ -113,9 +115,9 @@ function _init()
   cur_lvl=1
 
   boss={
-    nozzle={x=95,y=52,w=3,h=8},
-    hose={x=98,y=56,w=2,h=8},
-    body={x=100,y=60,w=16,h=8},
+    nozzle={x=95,y=52,w=3,h=8,oy=-12,ox=-5},
+    hose={x=98,y=56,w=2,h=8,oy=-8,ox=-2},
+    body={x=100,y=60,w=16,h=8,oy=-4,ox=0},
     active=false,
     maxhealth=100,
     health=10,
@@ -131,7 +133,12 @@ function _init()
     },
     timer=119+ceil(rnd(120)),
     state=1,
-    shots={}
+    shots={},
+    shots_tim={iv=30,unit="f"},
+    dy=-0.5,
+    dx=0,
+    ay=64,
+    ax=100
   }
 
   enemy_waves={}
@@ -282,10 +289,11 @@ function collision(_a,_b)
   end
 end
 
-function boss_collision(_shot)
-  return collision(_shot, boss.body) or
-  collision(_shot, boss.hose) or
-  collision(_shot, boss.nozzle)
+function boss_collision(_thing)
+  if (not boss.active) return
+  return collision(_thing, boss.body) or
+  collision(_thing, boss.hose) or
+  collision(_thing, boss.nozzle)
 end
 
 function update_ascii(_shield)
@@ -319,6 +327,15 @@ function update_ascii(_shield)
   elseif btn(3) then
     --unten ⬇️
     ascii.y=mid(0,ascii.y+1,121)
+  end
+
+  if ascii.collided then
+    ascii.cdtim-=1
+
+    if ascii.cdtim==0 then
+      ascii.collided=false
+      ascii.cdtim=ascii.cooldwn
+    end
   end
 end
 
@@ -403,7 +420,6 @@ function spawn_pwrup(_x, _y)
   local _chance=rnd(100) < 100
   local _i=ceil(rnd(#powerups_defs))
   local _p=shallowcopy(powerups_defs[_i],true)
-  powerupdebug=powerups_defs[_i]
   _p.x=_x
   _p.y=_y
   if _chance then
@@ -643,15 +659,6 @@ function update_enemies()
       if collision(_e,ascii.hitbox) then
         ascii_hit()
       end
-
-      if ascii.collided then
-        ascii.cdtim-=1
-
-        if ascii.cdtim==0 then
-          ascii.collided=false
-          ascii.cdtim=ascii.cooldwn
-        end
-      end
     end
     _dirty=false
   end
@@ -769,16 +776,28 @@ function update_game()
 end
 
 function update_boss()
+  boss.body.y=boss.ay+boss.body.oy
+  boss.nozzle.y=boss.ay+boss.nozzle.oy
+  boss.hose.y=boss.ay+boss.hose.oy
+  boss.body.x=boss.ax+boss.body.ox
+  boss.nozzle.x=boss.ax+boss.nozzle.ox
+  boss.hose.x=boss.ax+boss.hose.ox
+  boss.ay+=boss.dy
+  boss.ax+=boss.dx
+
   if boss.timer > 0 then
     boss.timer-=1
   elseif boss.timer==0 then
     boss.state=boss.state%3+1
     boss.timer=boss.t[boss.t_names[boss.state]]
   end
+
+  if boss.ay<20 or boss.ay>100 then
+    boss.dy*=-1
+  end
   
-  if boss.state==2 then --shooting
-    debug=tim.game.f
-    if tim.game.f==0 then
+  if boss.state==2 and boss.active then --shooting
+    if tim.game[boss.shots_tim.unit]%boss.shots_tim.iv==0 then
       add(boss.shots,{
         x=boss.nozzle.x-6,
         y=boss.nozzle.y+3,
@@ -790,9 +809,12 @@ function update_boss()
         dir=0
       })
     end
-    debug=#boss.shots
   elseif boss.state==3 then --vacuuming
 
+  end
+
+  if boss_collision(ascii.hitbox) then
+    ascii_hit()
   end
 end
 
@@ -801,6 +823,10 @@ function update_bossfire()
     local _shot=boss.shots[i]
     _shot.x-=_shot.spd
     _shot.x_end-=_shot.spd
+
+    if collision(_shot,ascii.hitbox) then
+      ascii_hit()
+    end
   end
 end
 
@@ -810,10 +836,11 @@ function update_bosslvl()
   update_map()
   update_cape()
   update_pwrups()
-  update_boss()
-  update_bossfire()
 
   update_ascii(get_powerup("shield"))
+
+  update_boss()
+  update_bossfire()
 
   if btnp(5) then
     shoot()
@@ -964,9 +991,14 @@ function draw_boss_health()
 end
 
 function draw_boss()
-  sspr(112,32,boss.body.w,boss.body.h,boss.body.x,boss.body.y)
-  sspr(122,40,boss.hose.w,boss.hose.h,boss.hose.x,boss.hose.y)
-  sspr(125,40,boss.nozzle.w,boss.nozzle.h,boss.nozzle.x,boss.nozzle.y)
+  if boss.health>0 then
+    sspr(112,32,boss.body.w,boss.body.h,boss.body.x,boss.body.y)
+    sspr(122,40,boss.hose.w,boss.hose.h,boss.hose.x,boss.hose.y)
+    sspr(125,40,boss.nozzle.w,boss.nozzle.h,boss.nozzle.x,boss.nozzle.y)
+  else
+    boss.active=false
+    --todo:explode
+  end
 end
 
 function draw_bosslvl()
