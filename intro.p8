@@ -5,7 +5,7 @@ __lua__
 
 function _init()
 	episode="34"
-	title="triforce of dev!"
+	title="sechs faueste fuer ascii"
 	--texts
 	text={
 		ln1="",
