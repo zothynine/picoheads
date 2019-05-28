@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 16
+version 18
 __lua__
 --catfight
 
@@ -68,7 +68,8 @@ function _init()
     pwrups={},
     cooldwn=180,
     cdtim=180,
-    hitbox={}
+    hitbox={},
+    spd={x=1,y=1}
   }
 
   shots={}
@@ -138,7 +139,8 @@ function _init()
     dy=-0.5,
     dx=0,
     ay=64,
-    ax=100
+    ax=100,
+    vacuum_force=0
   }
 
   enemy_waves={}
@@ -298,6 +300,7 @@ end
 
 function update_ascii(_shield)
   ascii.has_shield=_shield~=nil
+  ascii.spd.x=1
 
   if ascii.has_shield then
     ascii.hitbox={
@@ -317,7 +320,7 @@ function update_ascii(_shield)
 
   if btn(0) then
     --links ⬅️
-    ascii.x=mid(0,ascii.x-1,127)
+    ascii.x=mid(0,ascii.x-ascii.spd.x,127)
   elseif btn(1) then
     --rechts ➡️
     ascii.x=mid(0,ascii.x+1,120)
@@ -461,7 +464,7 @@ function update_shots()
     end
 
     if boss.active then
-      if boss_collision(_shot) then
+      if collision(_shot,boss.nozzle) then
         del(ascii.shots,_shot)
         if (boss.health>0) boss.health-=1
       end
@@ -788,6 +791,7 @@ function update_boss()
   if boss.timer > 0 then
     boss.timer-=1
   elseif boss.timer==0 then
+    boss.vacuum_force=0
     boss.state=boss.state%3+1
     boss.timer=boss.t[boss.t_names[boss.state]]
   end
@@ -796,26 +800,44 @@ function update_boss()
     boss.dy*=-1
   end
   
-  if boss.state==2 and boss.active then --shooting
-    if tim.game[boss.shots_tim.unit]%boss.shots_tim.iv==0 then
-      add(boss.shots,{
-        x=boss.nozzle.x-6,
-        y=boss.nozzle.y+3,
-        x_end=boss.nozzle.x-1,
-        y_end=boss.nozzle.y+4,
-        w=5,
-        h=2,
-        spd=2,
-        dir=0
-      })
+  if boss.active then
+    if boss.state ~= 3 then
+      snd2=false
+      sfx(-2,2)
     end
-  elseif boss.state==3 then --vacuuming
 
+    if boss.state==2 then --shooting
+      if tim.game[boss.shots_tim.unit]%boss.shots_tim.iv==0 then
+        add(boss.shots,{
+          x=boss.nozzle.x-6,
+          y=boss.nozzle.y+3,
+          x_end=boss.nozzle.x-1,
+          y_end=boss.nozzle.y+4,
+          w=5,
+          h=2,
+          spd=2,
+          dir=0
+        })
+      end
+    elseif boss.state==3 then --vacuuming
+      if (not snd2) sfx(2,2)
+      snd2=true
+      if boss.vacuum_force < 3 then
+        boss.vacuum_force+=0.01
+      end
+      update_vacuuming()
+    end
   end
 
   if boss_collision(ascii.hitbox) then
     ascii_hit()
   end
+end
+
+function update_vacuuming()
+  ascii.spd.x=max(1,boss.vacuum_force-0.1)
+  ascii.x=mid(0,ascii.x+boss.vacuum_force,105)
+  ascii.y-=sgn(ascii.y-boss.nozzle.y)*0.5
 end
 
 function update_bossfire()
@@ -1153,3 +1175,4 @@ __map__
 __sfx__
 000200003205032050320502f050270502305023000100000c00014000110000e0000d0000b0000b0000a00008000000000600005000060000600006000060000000000000000000000000000000000000000000
 000a00000a6731f6401f6401f6301363013630136200a6200a6100a61000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0010000c0c6200c6300c6300c6300c6300c6300c6200c6200c6300c6300c6200c6200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
