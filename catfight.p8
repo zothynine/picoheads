@@ -145,8 +145,32 @@ function _init()
 
   enemy_waves={}
 
+  particles={}
+
   _update60=update_start
   _draw=draw_start
+end
+
+function update_particles()
+  debug=#particles
+  for i=#particles,1,-1 do
+    local _p=particles[i]
+    if _p.t=="dust" then      
+      _p.lt-=1
+      _p.x=boss.nozzle.x-_p.lt
+      _p.y=boss.nozzle.y+_p.oy
+      if (_p.lt<=0) del(particles,_p)
+    end
+  end
+end
+
+function draw_particles()
+  for i=1,#particles do
+    local _p=particles[i]
+    if _p.t=="dust" then
+      pset(_p.x,_p.y,_p.col)
+    end
+  end
 end
 
 function print_center(_txt,_y,_c)
@@ -160,7 +184,7 @@ function print_right(_txt,_y,_c,_o)
   print(_t,128-(#_t*4)-_o,_y,_c)
 end
 
-function update_game_timer()
+function update_game_timer()  
   tim.game.f+=1
   if tim.game.f==59 then
     tim.game.f=0
@@ -758,6 +782,7 @@ end
 function update_game()
   update_game_timer()
   update_clouds()
+  update_particles()
   update_map()
   update_cape()
   update_waves()
@@ -838,6 +863,22 @@ function update_vacuuming()
   ascii.spd.x=max(1,boss.vacuum_force-0.1)
   ascii.x=mid(0,ascii.x+boss.vacuum_force,105)
   ascii.y-=sgn(ascii.y-boss.nozzle.y)*0.5
+  
+  if #particles<8 and tim.game.f%10==0 then
+    local _lt=flr(rnd(21))
+    local _oy=ceil(rnd(boss.nozzle.h))
+
+    add(particles,{
+      x=boss.nozzle.x-_lt,
+      y=boss.nozzle.y+_oy,
+      dx=1,
+      dy=0,
+      oy=_oy,
+      col=6,
+      lt=_lt,
+      t="dust"
+    })
+  end
 end
 
 function update_bossfire()
@@ -856,6 +897,7 @@ function update_bosslvl()
   update_game_timer()
   update_clouds()
   update_map()
+  update_particles()
   update_cape()
   update_pwrups()
 
@@ -988,6 +1030,7 @@ function draw_game()
   cls()
   rectfill(0,0,127,127,1)
   draw_map()
+  draw_particles()
   foreach(clouds,draw_cloud)
   draw_ascii()
   draw_shots()
@@ -1028,6 +1071,7 @@ function draw_bosslvl()
   rectfill(0,0,127,127,1)
   draw_map()
   foreach(clouds,draw_cloud)
+  draw_particles()
   draw_ascii()
   draw_shots()
   draw_boss()
@@ -1175,4 +1219,4 @@ __map__
 __sfx__
 000200003205032050320502f050270502305023000100000c00014000110000e0000d0000b0000b0000a00008000000000600005000060000600006000060000000000000000000000000000000000000000000
 000a00000a6731f6401f6401f6301363013630136200a6200a6100a61000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0010000c0c6200c6300c6300c6300c6300c6300c6200c6200c6300c6300c6200c6200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0010000c0c6100c6200c6200c6200c6200c6100c6100c6200c6200c6200c6100c6100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
