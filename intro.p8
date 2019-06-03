@@ -5,7 +5,7 @@ __lua__
 
 function _init()
 	episode="35"
-	title="???"
+	title="where is klemens sandiego?"
 	--texts
 	text={
 		ln1="",
