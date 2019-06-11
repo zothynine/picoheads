@@ -28,6 +28,13 @@ function _init()
     next_cloud=0
   }
 
+  cam={
+    x=0,
+    y=0,
+    d=1,
+    t=0
+  }
+
   -- height of the top info bar
   ui_h=8
 
@@ -89,28 +96,28 @@ function _init()
   }
 
   levels={
-    -- {
-    --   {tim="0:3:0",
-    --     swarm=swarms.stack,
-    --     e_type=enemy_types.rat,
-    --     path="linear",
-    --     x=127,
-    --     y=24,
-    --     count=5,
-    --     dirty=false,
-    --     health=2,
-    --     enemies={},
-    --     stop=30},
-    --   {tim="0:6:0",
-    --     swarm=swarms.line,
-    --     e_type=enemy_types.cannon,
-    --     path="floor",
-    --     x=127,
-    --     y=120-enemy_types.cannon.s[4],
-    --     count=1,
-    --     dirty=false,
-    --     enemies={}},
-    -- }
+    {
+      {tim="0:3:0",
+        swarm=swarms.stack,
+        e_type=enemy_types.rat,
+        path="linear",
+        x=127,
+        y=24,
+        count=5,
+        dirty=false,
+        health=2,
+        enemies={},
+        stop=30},
+      {tim="0:6:0",
+        swarm=swarms.line,
+        e_type=enemy_types.cannon,
+        path="floor",
+        x=127,
+        y=120-enemy_types.cannon.s[4],
+        count=1,
+        dirty=false,
+        enemies={}},
+    }
   }
 
   cur_lvl=1
@@ -152,24 +159,62 @@ function _init()
 end
 
 function update_particles()
-  debug=#particles
   for i=#particles,1,-1 do
     local _p=particles[i]
     if _p.t=="dust" then      
       _p.lt-=1
       _p.x=boss.nozzle.x-_p.lt
       _p.y=boss.nozzle.y+_p.oy
-      if (_p.lt<=0) del(particles,_p)
+    elseif _p.t=="explosion" then
+      _p.lt-=1
+      _p.x=_p.x+_p.dx
+      _p.y=_p.y+_p.dy
     end
+    
+    if (_p.lt<=0) del(particles,_p)
   end
 end
 
 function draw_particles()
   for i=1,#particles do
     local _p=particles[i]
-    if _p.t=="dust" then
-      pset(_p.x,_p.y,_p.col)
-    end
+    -- if _p.t=="dust" then
+    pset(_p.x,_p.y,_p.col)
+    -- end
+  end
+end
+
+function update_cam()
+  if cam.t==0 then
+    cam.x=0
+    cam.y=0
+    return
+  end
+
+  local _td=cam.t/10
+  cam.t-=1
+  cam.x=cam.x*cam.d+_td
+  cam.y=cam.y*cam.d+_td
+  cam.d*=-1
+end
+
+function camshake(_dur)
+  _dur=_dur or 30
+  cam.t=_dur
+end
+
+function explosion(_x,_y)
+  for i=1,10 do
+    add(particles,{
+      x=_x,
+      y=_y,
+      dx=-2+rnd(4),
+      dy=-2+rnd(4),
+      --??oy=_oy,
+      col=8+flr(rnd(3)),
+      lt=30+flr(rnd(31)),
+      t="explosion"
+    })
   end
 end
 
@@ -478,6 +523,8 @@ function update_shots()
             _e.health-=1
           else
             spawn_pwrup(_e.x, _e.y)
+            explosion(_e.x+(_e.w/2),_e.y+(_e.h/2))
+            camshake(10)
             delete_enemy(_w,_e)
             sfx(1)
             score+=1
@@ -788,6 +835,7 @@ function update_game()
   update_waves()
   update_enemies()
   update_pwrups()
+  update_cam()
 
   if #enemy_waves==0 and cur_lvl<=#levels then
     _update60=update_lvlend
@@ -900,6 +948,7 @@ function update_bosslvl()
   update_particles()
   update_cape()
   update_pwrups()
+  update_cam()
 
   update_ascii(get_powerup("shield"))
 
@@ -1028,6 +1077,7 @@ end
 
 function draw_game()
   cls()
+  camera(cam.x,cam.y)
   rectfill(0,0,127,127,1)
   draw_map()
   draw_particles()
@@ -1048,6 +1098,8 @@ function draw_game()
 
   draw_infobar()
   foreach(powerups, draw_pwrups)
+
+  print(debug,15,20,8)
 end
 
 function draw_boss_health()
@@ -1068,6 +1120,7 @@ end
 
 function draw_bosslvl()
   cls()
+  camera(cam.x,cam.y)
   rectfill(0,0,127,127,1)
   draw_map()
   foreach(clouds,draw_cloud)
