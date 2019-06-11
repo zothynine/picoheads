@@ -4,8 +4,8 @@ __lua__
 --outro
 
 function _init()
-	episode=35
-	next_date="11.6."
+	episode=36
+	next_date="18.6."
 	mx=40
 	ix=60
 	kx=80

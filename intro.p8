@@ -4,8 +4,8 @@ __lua__
 --picoheads intro
 
 function _init()
-	episode="35"
-	title="where is klemens sandiego?"
+	episode="36"
+	title="jetzt staubt's"
 	--texts
 	text={
 		ln1="",
