@@ -11,6 +11,7 @@ __lua__
 --todo
 -- function for print variants
 -- (shadow, outline, alignment, etc.)
+-- ❎🅾️⬆️⬇️⬅️➡️
 
 function _init()
   debug=""
@@ -18,6 +19,7 @@ function _init()
   lvltim=180
 
   tim={
+    f=0,
     game={
       m=0,
       s=0,
@@ -109,7 +111,7 @@ function _init()
     --     health=2,
     --     enemies={},
     --     stop=30},
-    --   {tim="0:6:0",
+    --   {timd="0:0:30",
     --     swarm=swarms.line,
     --     e_type=enemy_types.cannon,
     --     path="floor",
@@ -134,7 +136,7 @@ function _init()
     t={
       idle=119+ceil(rnd(120)),
       fire=479+ceil(rnd(240)),
-      vacuum=300
+      vacuum=200
     },
     t_names={
       "idle",
@@ -226,9 +228,13 @@ function explosion(_x,_y,_c,_bs,_blt)
   end
 end
 
-function print_center(_txt,_y,_c)
+function get_print_x(_txt)
   local _t=tostr(_txt)
-  print(_t,(128-(#_t*4))/2,_y,_c)
+  return 64-(#_t*2)
+end
+
+function print_center(_txt,_y,_c)
+  print(_txt,get_print_x(_txt),_y,_c)
 end
 
 function print_right(_txt,_y,_c,_o)
@@ -301,6 +307,7 @@ end
 --start
 
 function update_start()
+  tim.f=(tim.f+1)%60
   update_clouds()
   update_cape()
   if btn(5) then
@@ -309,21 +316,36 @@ function update_start()
   end
 end
 
+function print_shadow(_txt,_x,_y,_col,_anim,_center)
+  if (_center) _x=get_print_x(_txt)
+
+  print(_txt,_x,_y+1,0)
+  if _anim then
+
+    if tim.f<30 then
+      print(_txt,_x,_y,_col)
+    else
+      print(_txt,_x,_y+1,_col)
+    end
+  else
+
+    print(_txt,_x,_y,_col)
+  end
+end
+
 function draw_start()
   cls()
   rectfill(0,0,127,127,1)
   foreach(clouds,draw_cloud)
-  print_center("catfight",34,0)
-  print_center("catfight",35,7)
+  print_shadow("catfight",0,35,7,false,true)
   draw_ascii(2)
-  print_center("press ❎ to start",84,0)
-  print_center("press ❎ to start",85,7)
-  --print("press ❎ to start",30,69,0)
-  --print("press ❎ to start",30,70,7)
+  print_shadow("press   to start",0,84,7,false,true)
+  print_shadow("❎",54,84,7,true,false)
 end
 -->8
 --game start
 function update_lvlstart()
+  tim.f=(tim.f+1)%60
   update_clouds()
   update_cape()
   ascii.x=56
@@ -837,6 +859,7 @@ function update_pwrups()
 end
 
 function update_game()
+  tim.f=(tim.f+1)%60
   update_game_timer()
   update_clouds()
   update_particles()
@@ -862,6 +885,7 @@ function update_game()
 end
 
 function update_boss()
+  tim.f=(tim.f+1)%60
   if boss.timer > 0 then
     boss.timer-=1
   elseif boss.timer==0 then
@@ -1162,6 +1186,7 @@ end
 -->8
 --game over
 function update_lvlend()
+  tim.f=(tim.f+1)%60
   update_clouds()
   update_cape()
   if (ascii.x < 138) ascii.x+=1
