@@ -4,8 +4,8 @@ __lua__
 --picoheads intro
 
 function _init()
-	episode="39"
-	title="startscreen makeover"
+	episode="40"
+	title="more makeover"
 	--texts
 	text={
 		ln1="",
