@@ -58,7 +58,7 @@ function _init()
   powerups_defs={
     {cat="shot", type="dbllaser",sx=28,sy=0,w=6,h=6},
     {cat="shot", type="trpllaser",sx=40,sy=0,w=6,h=6},
-    {cat="shield", type="common",sx=34,sy=0,w=6,h=6,r=8,lt=3,col=7}
+    {cat="shield", type="common",sx=34,sy=0,w=6,h=6,r=10,lt=3,col=7}
   }
 
   powerups={}
@@ -99,28 +99,28 @@ function _init()
   }
 
   levels={
-    -- {
-    --   {tim="0:3:0",
-    --     swarm=swarms.stack,
-    --     e_type=enemy_types.rat,
-    --     path="linear",
-    --     x=127,
-    --     y=24,
-    --     count=5,
-    --     dirty=false,
-    --     health=2,
-    --     enemies={},
-    --     stop=30},
-    --   {timd="0:0:30",
-    --     swarm=swarms.line,
-    --     e_type=enemy_types.cannon,
-    --     path="floor",
-    --     x=127,
-    --     y=120-enemy_types.cannon.s[4],
-    --     count=1,
-    --     dirty=false,
-    --     enemies={}},
-    -- }
+    {
+      {tim="0:3:0",
+        swarm=swarms.stack,
+        e_type=enemy_types.rat,
+        path="linear",
+        x=127,
+        y=24,
+        count=5,
+        dirty=false,
+        health=2,
+        enemies={},
+        stop=30},
+      {timd="0:0:30",
+        swarm=swarms.line,
+        e_type=enemy_types.cannon,
+        path="floor",
+        x=127,
+        y=120-enemy_types.cannon.s[4],
+        count=1,
+        dirty=false,
+        enemies={}},
+    }
   }
 
   cur_lvl=1
@@ -233,8 +233,11 @@ function get_print_x(_txt)
   return 64-(#_t*2)
 end
 
-function print_center(_txt,_y,_c)
-  print(_txt,get_print_x(_txt),_y,_c)
+function print_center(_txt,_y,_c,_r)
+  local _t=tostr(_txt)
+  local _txt_x=get_print_x(_txt)
+  if (_r) draw_ribbon(_txt_x,_y,#_t*4)
+  print(_txt,_txt_x,_y,_c)
 end
 
 function print_right(_txt,_y,_c,_o)
@@ -334,6 +337,21 @@ function print_shadow(_txt,_x,_y,_col,_anim,_center)
   end
 end
 
+function draw_ribbon(_txt_x,_txt_y,_txt_l)
+  local _x=_txt_x-13
+  local _y=_txt_y-3
+  --ribbon with shadow
+  pal(12,0)
+  pal(14,0)
+  sspr(0,48,10,14,_x,_y+2)
+  sspr(10,48,1,15,_x+10,_y+2,_txt_l+5,15)
+  sspr(39,48,10,14,_x+_txt_l+15,_y+2)
+  pal()
+  sspr(0,48,10,14,_x,_y)
+  sspr(10,48,1,15,_x+10,_y,_txt_l+5,15)
+  sspr(39,48,10,14,_x+_txt_l+15,_y)
+end
+
 function draw_start()
   cls()
   rectfill(0,0,127,127,1)
@@ -345,18 +363,11 @@ function draw_start()
   draw_map({l1=true})
   pal()
   rectfill(0,119,127,127,0) --black floor
-
-  --ribbon with shadow
-  pal(12,0)
-  pal(14,0)
-  sspr(0,48,49,15,39,35)
-  pal()
-  sspr(0,48,49,15,39,33)
-
-  print_center("catfight",36,7)
+  print_center("catfight",36,7,true)
   draw_ascii(2)
   print_shadow("press   to start",0,84,7,false,true)
   print_shadow("❎",54,84,7,true,false)
+  print(debug,15,20,8)
 end
 -->8
 --game start
@@ -388,8 +399,7 @@ function draw_lvlstart()
   if cur_lvl>#levels then
     _txt="boss battle"
   end
-  print_center(_txt, 84, 0)
-  print_center(_txt, 85, 7)
+  print_center(_txt,35,7,true)
 end
 -->8
 --game
@@ -1322,9 +1332,9 @@ b3b3b3b3000555d55555500055555555000000055000000000000007700000000000000000000000
 00000000000000333330000033333333333333330000000033333333000000000000000000000000000000000000000000000000000000000000000000990999
 000000000000033333333000333333333333333300000000333333330000000000000000000000000000000000000000000000000000000000000000009a0999
 000000000003b3333333330033333333333333330000000033333333000000000000000000000000000000000000000000000000000000000000000000a90999
-00000000033333333333333033333333333333330000000033333333000000000000000000000000000000000000000000000000000000000000000000990999
-000000000000000000000000000000000000000000000000333333330000000000000000000000000000000000000000000000000000000000000000009a0990
-00000000000000000000000000000000000000000000000033333333000000000000000000000000000000000000000000000000000000000000000000a90900
+00000000033333333333333033333333333333330000330033333333000000000000000000000000000000000000000000000000000000000000000000990999
+00000000333b333333333333333333333333333303b33330333333330000000000000000000000000000000000000000000000000000000000000000009a0990
+00000000333333333333333333333333333333333333333333333333000000000000000000000000000000000000000000000000000000000000000000a90900
 000000ccccccccccccccccccccccccccccccccccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000ceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeec0000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 ccccccceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeccccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000
