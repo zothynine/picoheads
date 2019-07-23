@@ -9,8 +9,16 @@ __lua__
 -- 02 vaccuming
 
 --todo
--- function for print variants
--- (shadow, outline, alignment, etc.)
+  --endscreen f. gewonnen
+  --ascii rausfliegen, wenn boss explodiert
+  --boss explosion verschoenern
+  --credits
+  --musik
+  --3 leveldefinitionen
+  --wave wird aktiv wenn vorige wave weg
+    --screen verlassen oder komplett abgeschossen
+    
+
 -- ❎🅾️⬆️⬇️⬅️➡️
 
 function _init()
