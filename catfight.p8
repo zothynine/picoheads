@@ -9,8 +9,6 @@ __lua__
 -- 02 vaccuming
 
 --todo
-  --endscreen f. gewonnen
-  --ascii rausfliegen, wenn boss explodiert
   --sfx bei explosions als parameter
   --sounds generell 
     --gegner schuesse
@@ -23,6 +21,7 @@ __lua__
   --ascii blink bug
   --ascii range of motion verringern
   --boss range of motion erhoehen
+  --saugrauschen beenden wenn boss.active=false
     
 
 -- ❎🅾️⬆️⬇️⬅️➡️
@@ -93,7 +92,8 @@ function _init()
     cooldwn=180,
     cdtim=180,
     hitbox={},
-    spd={x=1,y=1}
+    spd={x=1,y=1},
+    keypress=true
   }
 
   shots={}
@@ -113,28 +113,28 @@ function _init()
   }
 
   levels={
-    -- {
-    --   {tim="0:3:0",
-    --     swarm=swarms.stack,
-    --     e_type=enemy_types.rat,
-    --     path="linear",
-    --     x=127,
-    --     y=24,
-    --     count=5,
-    --     dirty=false,
-    --     health=2,
-    --     enemies={},
-    --     stop=30},
-    --   {timd="0:0:30",
-    --     swarm=swarms.line,
-    --     e_type=enemy_types.cannon,
-    --     path="floor",
-    --     x=127,
-    --     y=120-enemy_types.cannon.s[4],
-    --     count=1,
-    --     dirty=false,
-    --     enemies={}},
-    -- }
+    {
+      {tim="0:3:0",
+        swarm=swarms.stack,
+        e_type=enemy_types.rat,
+        path="linear",
+        x=127,
+        y=24,
+        count=5,
+        dirty=false,
+        health=2,
+        enemies={},
+        stop=30},
+      {tim="0:9:0",
+        swarm=swarms.line,
+        e_type=enemy_types.cannon,
+        path="floor",
+        x=127,
+        y=120-enemy_types.cannon.s[4],
+        count=1,
+        dirty=false,
+        enemies={}},
+    }
   }
 
   cur_lvl=1
@@ -145,7 +145,7 @@ function _init()
     body={x=100,y=60,w=16,h=8,oy=-4,ox=0},
     active=false,
     maxhealth=100,
-    health=1,
+    health=50,
     dying=600,
     t={
       idle=119+ceil(rnd(120)),
@@ -294,6 +294,14 @@ function shallowcopy(_orig, _kv)
   return _copy
 end
 
+function ascii_goto(_x,_y)
+  ascii.keypress=false
+  if (ascii.x < _x) ascii.x+=1
+  if (ascii.y < _y) ascii.y+=1
+  if (ascii.x > _x) ascii.x-=1
+  if (ascii.y > _y) ascii.y-=1
+end
+
 function setuplvl()
   tim.game={
     m=0,
@@ -319,6 +327,7 @@ function reset_state()
   ascii.x=56
   ascii.y=55
   ascii.collided=false
+  ascii.keypress=true
 end
 
 function _update60()
@@ -384,7 +393,7 @@ function draw_start()
   pal()
   rectfill(0,119,127,127,0) --black floor
   print_center("catfight",36,7,true)
-  draw_ascii(2)
+  draw_ascii()
   print_shadow("press   to start",0,84,7,false,true)
   print_shadow("❎",54,84,7,true,false)
   print(debug,15,20,8)
@@ -414,7 +423,7 @@ function draw_lvlstart()
   cls()
   rectfill(0,0,127,127,1)
   foreach(clouds,draw_cloud)
-  draw_ascii(2)
+  draw_ascii()
   local _txt="level "..cur_lvl
   if cur_lvl>#levels then
     _txt="boss battle"
@@ -463,21 +472,23 @@ function update_ascii(_shield)
     }
   end
 
-  if btn(0) then
-    --links ⬅️
-    ascii.x=mid(0,ascii.x-ascii.spd.x,127)
-  end
-  if btn(1) then
-    --rechts ➡️
-    ascii.x=mid(0,ascii.x+1,120)
-  end
-  if btn(2) then
-    --oben ⬆️
-    ascii.y=mid(ui_h+1,ascii.y-1,127)
-  end
-  if btn(3) then
-    --unten ⬇️
-    ascii.y=mid(0,ascii.y+1,121)
+  if ascii.keypress then
+    if btn(0) then
+      --links ⬅️
+      ascii.x=mid(0,ascii.x-ascii.spd.x,127)
+    end
+    if btn(1) then
+      --rechts ➡️
+      ascii.x=mid(0,ascii.x+1,120)
+    end
+    if btn(2) then
+      --oben ⬆️
+      ascii.y=mid(ui_h+1,ascii.y-1,127)
+    end
+    if btn(3) then
+      --unten ⬇️
+      ascii.y=mid(0,ascii.y+1,121)
+    end
   end
 
   if ascii.collided then
@@ -619,6 +630,7 @@ function update_shots()
         camshake(3)
         del(ascii.shots,_shot)
         if (boss.health>0) boss.health-=1
+        score+=1
       end
     end
   end
@@ -926,7 +938,7 @@ function update_game()
 
   update_ascii(get_powerup("shield"))
 
-  if btnp(5) then
+  if btnp(5) and ascii.keypress then
     shoot()
   end
 
@@ -989,7 +1001,10 @@ function update_boss()
     ascii_hit()
   end
 
-  if (boss.health<=0) boss.active=false
+  if boss.health<=0 and boss.active then
+    boss.active=false
+    score+=100
+  end
 end
 
 function update_vacuuming()
@@ -1100,8 +1115,8 @@ function draw_infobar()
   print_right(score,2,7,1)
 end
 
-function draw_ascii(_scale,_ghost)
-  local _scale=_scale or 1
+function draw_ascii(_ghost)
+  local _scale=1
   local _ghost=_ghost or false
 
   if (ascii.has_shield) draw_shield(get_powerup("shield"),_scale)
@@ -1219,6 +1234,17 @@ function draw_boss()
       camshake(12)
     end
 
+    if (boss.dying>120) ascii_goto(64-(ascii.hitbox.w/2),boss.body.y-4)
+    if (boss.dying<=120) ascii_goto(138,ascii.y)
+
+    if boss.dying==0 then
+      _update60=update_game_end
+      _draw=draw_game_end
+      ascii.pwrups={}
+      ascii.x=ascii.hitbox.w*-1
+      ascii.y=64-(ascii.hitbox.h/2)
+    end
+
     boss.dying-=1
   end
 end
@@ -1247,7 +1273,7 @@ function update_lvlend()
   tim.f=(tim.f+1)%60
   update_clouds()
   update_cape()
-  if (ascii.x < 138) ascii.x+=1
+  ascii_goto(138,ascii.y)
 
   -- button c
   if btn(4) then
@@ -1273,6 +1299,26 @@ function draw_lvlend()
   -- text
   print_center("press c to continue", 60, 7)
 end
+-->8
+--game end
+
+function update_game_end()
+  update_clouds()
+  update_cape()
+  update_ascii()
+  ascii_goto(64-(ascii.hitbox.w/2),64-(ascii.hitbox.h/2))
+end
+
+function draw_game_end()
+  cls()
+  rectfill(0,0,127,127,1)
+  foreach(clouds,draw_cloud)
+  draw_map()
+  print_center("awesome! you won!",35,7,true)
+  draw_ascii()
+  print_center("final score: "..score,92,7,true)
+end
+
 -->8
 --game over
 
@@ -1304,9 +1350,9 @@ function draw_gover()
   print_center("your score is "..score,42,0)
   print_center("your score is "..score,43,7)
   if ascii.ghost_y >= -7 then
-    draw_ascii(2,true)
+    draw_ascii(true)
   else
-    draw_ascii(2)
+    draw_ascii()
   end
 end
 __gfx__
