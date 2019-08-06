@@ -5,7 +5,7 @@ __lua__
 
 function _init()
 	episode=42
-	next_date="13.8."
+	next_date="20.8."
 	mx=40
 	ix=60
 	kx=80
