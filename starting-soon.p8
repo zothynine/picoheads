@@ -4,7 +4,7 @@ __lua__
 --intro
 
 function _init()
-	episode = "41"
+	episode = "42"
 	mx=40
 	ix=60
 	kx=80
