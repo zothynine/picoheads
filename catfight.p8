@@ -13,16 +13,12 @@ __lua__
   --sounds generell 
     --gegner schuesse
     --verschiedene projektile
-  --credits
+  --!!!angefangen!!! credits
   --musik
   --3 leveldefinitionen
   --wave wird aktiv wenn vorige wave weg
     --screen verlassen oder komplett abgeschossen
-  --ascii blink bug
-  --ascii range of motion verringern
-  --boss range of motion erhoehen
-  --saugrauschen beenden wenn boss.active=false
-    
+  -- letzte explosion im level abwarten
 
 -- ❎🅾️⬆️⬇️⬅️➡️
 
@@ -41,7 +37,8 @@ function _init()
     },
     lvlstart=lvltim,
     cape=12,
-    next_cloud=0
+    next_cloud=0,
+    credits=600
   }
 
   cam={
@@ -145,7 +142,7 @@ function _init()
     body={x=100,y=60,w=16,h=8,oy=-4,ox=0},
     active=false,
     maxhealth=100,
-    health=50,
+    health=1,
     dying=600,
     t={
       idle=119+ceil(rnd(120)),
@@ -171,6 +168,9 @@ function _init()
   enemy_waves={}
 
   particles={}
+
+  won_y=35
+  score_y=92
 
   _update60=update_start
   _draw=draw_start
@@ -483,11 +483,11 @@ function update_ascii(_shield)
     end
     if btn(2) then
       --oben ⬆️
-      ascii.y=mid(ui_h+1,ascii.y-1,127)
+      ascii.y=mid(ui_h+12,ascii.y-1,127)
     end
     if btn(3) then
       --unten ⬇️
-      ascii.y=mid(0,ascii.y+1,121)
+      ascii.y=mid(0,ascii.y+1,110)
     end
   end
 
@@ -846,6 +846,8 @@ function ascii_hit()
   end
 
   if ascii.lives<0 then
+    ascii.collided=false
+    ascii.cdtim=ascii.cooldwn
     _update60=update_gover
     _draw=draw_gover
   end
@@ -955,7 +957,7 @@ function update_boss()
     boss.timer=boss.t[boss.t_names[boss.state]]
   end
 
-  if boss.ay<20 or boss.ay>100 then
+  if boss.ay<24 or boss.ay>116 then
     boss.dy*=-1
   end
 
@@ -1003,6 +1005,7 @@ function update_boss()
 
   if boss.health<=0 and boss.active then
     boss.active=false
+    sfx(-2,2)
     score+=100
   end
 end
@@ -1306,7 +1309,15 @@ function update_game_end()
   update_clouds()
   update_cape()
   update_ascii()
-  ascii_goto(64-(ascii.hitbox.w/2),64-(ascii.hitbox.h/2))
+  if tim.credits>0 then
+    ascii_goto(64-(ascii.hitbox.w/2),64-(ascii.hitbox.h/2))
+    tim.credits-=1
+  end
+  if tim.credits==0 then
+    if (won_y>-16) won_y-=1
+    if (score_y>-16) score_y-=1
+    ascii_goto(ascii.x,-16)
+  end
 end
 
 function draw_game_end()
@@ -1314,9 +1325,9 @@ function draw_game_end()
   rectfill(0,0,127,127,1)
   foreach(clouds,draw_cloud)
   draw_map()
-  print_center("awesome! you won!",35,7,true)
+  print_center("awesome! you won!",won_y,7,true)
   draw_ascii()
-  print_center("final score: "..score,92,7,true)
+  print_center("final score: "..score,score_y,7,true)
 end
 
 -->8
