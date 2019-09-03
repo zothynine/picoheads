@@ -10,15 +10,14 @@ __lua__
 
 --todo
   --sfx bei explosions als parameter
-  --sounds generell 
+  --sounds generell (bis slot 15)
     --gegner schuesse
     --verschiedene projektile
-  --!!!angefangen!!! credits
-  --musik
+  --musik (ab slot 16)
   --3 leveldefinitionen
   --wave wird aktiv wenn vorige wave weg
     --screen verlassen oder komplett abgeschossen
-  -- letzte explosion im level abwarten
+  --vulkanausbrueche bei den bergen
 
 -- ❎🅾️⬆️⬇️⬅️➡️
 
@@ -169,11 +168,42 @@ function _init()
 
   particles={}
 
+  fade_i=0
+  fadeout_table={
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {1,1,1,1,1,1,1,0,0,0,0,0,0,0,0},
+    {2,2,2,2,2,2,1,1,1,0,0,0,0,0,0},
+    {3,3,3,3,3,3,1,1,1,0,0,0,0,0,0},
+    {4,4,4,2,2,2,2,2,1,1,0,0,0,0,0},
+    {5,5,5,5,5,1,1,1,1,1,0,0,0,0,0},
+    {6,6,13,13,13,13,5,5,5,5,1,1,1,0,0},
+    {7,6,6,6,6,13,13,13,5,5,5,1,1,0,0},
+    {8,8,8,8,2,2,2,2,2,2,0,0,0,0,0},
+    {9,9,9,4,4,4,4,4,4,5,5,0,0,0,0},
+    {10,10,9,9,9,4,4,4,5,5,5,5,0,0,0},
+    {11,11,11,3,3,3,3,3,3,3,0,0,0,0,0},
+    {12,12,12,12,12,3,3,1,1,1,1,1,1,0,0},
+    {13,13,13,5,5,5,5,1,1,1,1,1,0,0,0},
+    {14,14,14,13,4,4,2,2,2,2,2,1,1,0,0},
+    {15,15,6,13,13,13,5,5,5,5,5,1,1,0,0}
+  }
+
   won_y=35
   score_y=92
+  credit_y=128
 
   _update60=update_start
   _draw=draw_start
+end
+
+function fade(i)
+  for c=0,15 do
+    if flr(i+1)>=16 then
+      pal(c,0)
+    else
+      pal(c,fadeout_table[c+1][flr(i+1)])
+    end
+  end
 end
 
 function update_particles()
@@ -375,7 +405,8 @@ function draw_ribbon(_txt_x,_txt_y,_txt_l)
   sspr(0,48,10,14,_x,_y+2)
   sspr(10,48,1,15,_x+10,_y+2,_txt_l+5,15)
   sspr(39,48,10,14,_x+_txt_l+15,_y+2)
-  pal()
+  pal(12,12)
+  pal(14,14)
   sspr(0,48,10,14,_x,_y)
   sspr(10,48,1,15,_x+10,_y,_txt_l+5,15)
   sspr(39,48,10,14,_x+_txt_l+15,_y)
@@ -933,7 +964,7 @@ function update_game()
   update_pwrups()
   update_cam()
 
-  if #enemy_waves==0 and cur_lvl<=#levels then
+  if #enemy_waves==0 and cur_lvl<=#levels and #particles == 0 then
     _update60=update_lvlend
     _draw=draw_lvlend
   end
@@ -1317,6 +1348,7 @@ function update_game_end()
     if (won_y>-16) won_y-=1
     if (score_y>-16) score_y-=1
     ascii_goto(ascii.x,-16)
+    if (fade_i==0) fade_i=1
   end
 end
 
@@ -1328,6 +1360,48 @@ function draw_game_end()
   print_center("awesome! you won!",won_y,7,true)
   draw_ascii()
   print_center("final score: "..score,score_y,7,true)
+  if fade_i>0 then
+    fade(fade_i)
+    if flr(fade_i+1)<16 then
+      fade_i+=0.1
+    else
+      pal(7,7)
+      _draw=draw_credits
+      _update60=update_credits
+    end
+  end
+end
+
+-->8
+--credits
+
+function update_credits()
+  credit_y-=0.5
+end
+
+function draw_credits()
+  cls()
+  pal()
+  local y_off=8
+  print_center("*concept and programming*",credit_y,7)
+  print_center("mario zoth",credit_y+y_off,7)
+  print_center("klemens kunz",credit_y+y_off*2,7)
+
+  print_center("*graphics*",credit_y+y_off*5,7)
+  print_center("mario zoth",credit_y+y_off*6,7)
+  print_center("klemens kunz",credit_y+y_off*7,7)
+  print_center("peter hofmann",credit_y+y_off*8,7)
+
+  print_center("*sound effects*",credit_y+y_off*11,7)
+  print_center("mario zoth",credit_y+y_off*12,7)
+
+  print_center("*music*",credit_y+y_off*15,7)
+  print_center("klemens kunz",credit_y+y_off*16,7)
+
+  print_center("*special thanks*",credit_y+y_off*19,7)
+  print_center("mischa magyar",credit_y+y_off*20,7)
+  print_center("ingrid menzl",credit_y+y_off*21,7)
+  print_center("tobias lendl",credit_y+y_off*22,7)
 end
 
 -->8
