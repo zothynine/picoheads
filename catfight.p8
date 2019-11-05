@@ -656,7 +656,6 @@ function update_shots()
             explosion(_e.x+(_e.w/2),_e.y+(_e.h/2),10,-2,30,"px",_sfx)
             camshake(10)
             delete_enemy(_w,_e)
-            -- sfx(1)
             score+=1
           end
           del(ascii.shots,_shot)
@@ -1395,7 +1394,9 @@ end
 --credits
 
 function update_credits()
-  credit_y-=0.5
+  if credit_y> -140 then
+    credit_y-=0.5
+  end
 end
 
 function draw_credits()
