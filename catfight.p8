@@ -6,7 +6,7 @@ __lua__
 --sfx
 -- 00 laser
 -- 01 explosion
--- 02 expolisom low
+-- 02 explosion low
 -- 03 hit by bullet (not exploding)
 -- 15 vaccuming
 
@@ -1268,7 +1268,7 @@ function draw_boss()
 
   if not boss.active then
     if boss.dying%5==0 and boss.dying>0 then
-      local _sfx = 1+flr(rnd(2))
+      local _sfx=1+flr(rnd(2))
       if (boss.dying==1) _sfx=2
 
       if boss.dying%35==0 then
@@ -1394,7 +1394,7 @@ end
 --credits
 
 function update_credits()
-  if credit_y> -140 then
+  if credit_y>-140 then
     credit_y-=0.5
   end
 end
