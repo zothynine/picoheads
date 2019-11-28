@@ -80,6 +80,14 @@ function _init()
     spd={x=1,y=1}
   }
 
+  --initial ascii.hitbox
+  ascii.hitbox={
+    x=ascii.x,
+    y=ascii.y,
+    w=ascii.w,
+    h=ascii.h
+  }
+
   shots={}
 
   enemy_types={
@@ -97,28 +105,36 @@ function _init()
   }
 
   levels={
-    -- {
-    --   {tim="0:3:0",
-    --     swarm=swarms.stack,
-    --     e_type=enemy_types.rat,
-    --     path="linear",
-    --     x=127,
-    --     y=24,
-    --     count=5,
-    --     dirty=false,
-    --     health=2,
-    --     enemies={},
-    --     stop=30},
-    --   {tim="0:6:0",
-    --     swarm=swarms.line,
-    --     e_type=enemy_types.cannon,
-    --     path="floor",
-    --     x=127,
-    --     y=120-enemy_types.cannon.s[4],
-    --     count=1,
-    --     dirty=false,
-    --     enemies={}},
-    -- }
+    {
+      {swarm=swarms.stack,
+        e_type=enemy_types.mouse,
+        path="linear",
+        x=127,
+        y=24,
+        count=5,
+        dirty=false,
+        health=2,
+        enemies={},
+        stop=30},
+      {swarm=swarms.stack,
+        e_type=enemy_types.rat,
+        path="linear",
+        x=127,
+        y=24,
+        count=5,
+        dirty=false,
+        health=2,
+        enemies={},
+        stop=30},
+      {swarm=swarms.line,
+        e_type=enemy_types.cannon,
+        path="floor",
+        x=127,
+        y=120-enemy_types.cannon.s[4],
+        count=1,
+        dirty=false,
+        enemies={}},
+    }
   }
 
   cur_lvl=1
@@ -163,7 +179,7 @@ end
 function update_particles()
   for i=#particles,1,-1 do
     local _p=particles[i]
-    if _p.t=="dust" then      
+    if _p.t=="dust" then
       _p.lt-=1
       _p.x=boss.nozzle.x-_p.lt
       _p.y=boss.nozzle.y+_p.oy
@@ -172,7 +188,7 @@ function update_particles()
       _p.x=_p.x+_p.dx
       _p.y=_p.y+_p.dy
     end
-    
+
     if (_p.lt<=0) del(particles,_p)
   end
 end
@@ -221,7 +237,7 @@ function explosion(_x,_y,_c,_bs,_blt)
       lt=_blt+flr(rnd(_blt+1)),
       t="explosion"
     })
-    
+
     sfx(1)
   end
 end
@@ -237,7 +253,7 @@ function print_right(_txt,_y,_c,_o)
   print(_t,128-(#_t*4)-_o,_y,_c)
 end
 
-function update_game_timer()  
+function update_game_timer()
   tim.game.f+=1
   if tim.game.f==59 then
     tim.game.f=0
@@ -643,14 +659,10 @@ function create_wave(_w)
 end
 
 function update_waves()
-  for i=1,#enemy_waves do
-    local _w=enemy_waves[i]
-    if _w.tim==tim.game.str then
-      if not _w.created then
-        create_wave(_w)
-        _w.created=true
-      end
-    end
+  local _w=enemy_waves[1]
+  if _w and not _w.created then
+    create_wave(_w)
+    _w.created=true
   end
 end
 
@@ -674,7 +686,7 @@ function update_enemies()
         if (not _dirty and _w.x>70) _w.x-=0.5
         _e.x=_w.x+_w.swarm.r*cos(_e.a)
         _e.y=_w.y+_w.swarm.r*sin(_e.a)
-        
+
         if _w.x<=_w.stop then
           _w.stopped=true
           _e.a+=0.01
@@ -683,7 +695,7 @@ function update_enemies()
         end
       elseif _w.path=="linear" then
         if (_e.x+_e.w<0) delete_enemy(_w,_e)
-        
+
         if not _dirty then
           if _w.stop and _w.x < _w.stop then
             _w.stopped=true
@@ -873,7 +885,7 @@ function update_boss()
   if boss.ay<20 or boss.ay>100 then
     boss.dy*=-1
   end
-  
+
   if boss.active then
     boss.body.y=boss.ay+boss.body.oy
     boss.nozzle.y=boss.ay+boss.nozzle.oy
@@ -923,7 +935,7 @@ function update_vacuuming()
   ascii.spd.x=max(1,boss.vacuum_force-0.1)
   ascii.x=mid(0,ascii.x+boss.vacuum_force,105)
   ascii.y-=sgn(ascii.y-boss.nozzle.y)*0.5
-  
+
   if #particles<8 and tim.game.f%10==0 then
     local _lt=flr(rnd(21))
     local _oy=ceil(rnd(boss.nozzle.h))
@@ -1136,7 +1148,7 @@ function draw_boss()
         15+flr(rnd(20)))
       camshake(30)
     end
-    
+
     boss.dying-=1
   end
 end
