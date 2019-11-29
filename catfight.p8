@@ -94,6 +94,14 @@ function _init()
     keypress=true
   }
 
+  --initial ascii.hitbox
+  ascii.hitbox={
+    x=ascii.x,
+    y=ascii.y,
+    w=ascii.w,
+    h=ascii.h
+  }
+
   shots={}
 
   enemy_types={
@@ -112,8 +120,17 @@ function _init()
 
   levels={
     {
-      {tim="0:3:0",
-        swarm=swarms.stack,
+      {swarm=swarms.stack,
+        e_type=enemy_types.mouse,
+        path="linear",
+        x=127,
+        y=24,
+        count=5,
+        dirty=false,
+        health=2,
+        enemies={},
+        stop=30},
+      {swarm=swarms.stack,
         e_type=enemy_types.rat,
         path="linear",
         x=127,
@@ -123,8 +140,7 @@ function _init()
         health=2,
         enemies={},
         stop=30},
-      {tim="0:9:0",
-        swarm=swarms.line,
+      {swarm=swarms.line,
         e_type=enemy_types.cannon,
         path="floor",
         x=127,
@@ -768,14 +784,10 @@ function create_wave(_w)
 end
 
 function update_waves()
-  for i=1,#enemy_waves do
-    local _w=enemy_waves[i]
-    if _w.tim==tim.game.str then
-      if not _w.created then
-        create_wave(_w)
-        _w.created=true
-      end
-    end
+  local _w=enemy_waves[1]
+  if _w and not _w.created then
+    create_wave(_w)
+    _w.created=true
   end
 end
 
