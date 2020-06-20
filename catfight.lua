@@ -75,8 +75,8 @@ function _init()
     y=55,
     ghost_x=60,
     ghost_y=100,
-    w=14,
-    h=9,
+    w=8,
+    h=7,
     shots={},
     collided=false,
     lives=8,
@@ -1181,7 +1181,7 @@ function draw_ascii(_ghost)
   pal(ascii.cape[1],8)
   palt(ascii.cape[2],true)
   palt(ascii.cape[3],true)
-  sspr(98,0,ascii.w,ascii.h,ascii.x,ascii.y,ascii.w*_scale,ascii.h*_scale)
+  sspr(8,0,ascii.w,ascii.h,ascii.x,ascii.y,ascii.w*_scale,ascii.h*_scale)
   if _ghost then
     pal(7,6)
     pal(9,6)
