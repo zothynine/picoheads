@@ -1122,7 +1122,7 @@ function draw_shots()
     local _xe=ascii.shots[i].x_end
     local _ye=ascii.shots[i].y_end
     local _w=ascii.shots[i].w
-    line(_xs,_ys,_xe,_ye,8)
+    line(_xs,_ys,_xe,_ye,11)
   end
 
   for i=1,#shots do
